@@ -3,15 +3,25 @@
 from PIL import Image
 from Helpers import *
 import os
+import math
 
 ENCODE = "1"
 DECODE = "2"
 RETURNMAIN = "return"
 EXTPNG = ".png"
 
-BYTETOKILOBYTE = 1/1024
+BYTETOKILOBYTE = 1/1000
 BITTOBYTE = 1/8
 RGBCHANNELS = 3
+BYTETOBIT = 8
+
+CONFIRM = "yes"
+CONFIRM2 = "y"
+DENY = "no"
+DENY2 = "n"
+
+# Note to self, the plaintext is "steganography"
+DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 
 print("COMP6841 Steganography Project 1.0\n")
 
@@ -73,8 +83,42 @@ def encodingSettings(fileDirectory):
         print("\nDimensions:", width, "x", height)
         print("Encodable Information:", encodeLimit, "kB")
 
-    input("Press Enter to exit...")
+    print('\nWould you like to encode data on this photo, type either "yes" or "no"')
+    encodingConfirmation = input("Option Selected: ").lower()
 
+    if encodingConfirmation == CONFIRM or encodingConfirmation == CONFIRM2:
+        encodingFingerprint(fileDirectory)
+    elif encodingConfirmation == DENY or encodingConfirmation == DENY2:
+        clearTerminal()
+        print("Returning to encoding menu\n")
+        encodeMenu()
+    else:
+        clearTerminal()
+        print("Please type a valid option\n")
+        encodingSettings(fileDirectory)
+
+def encodingFingerprint(fileDirectory):
+    hash = DEFAULTHASH
+    fileName = os.path.basename(fileDirectory)
+
+    print('\nWould you like to use a specific fingerprint to identify ', fileName, 'type either "yes" or "no"')
+    fingerprintChoice = input("Option Selected: ").lower()
+    if fingerprintChoice == CONFIRM or fingerprintChoice == CONFIRM2:
+        fingerprint = input('Fingerprint: ')
+        hash = hashGenerator(fingerprint)
+    elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
+        encodingFingerprint(fileDirectory)
+
+    clearTerminal()
+    print("Fingerprint has been created:", hash)
+    encodingInformation(fileDirectory, hash)
+
+def encodingInformation(fileDirectory, hash):
+    info = input("Enter information to encode:")
+    encodedData = dataEncoder(info, hash)
+    totalBits = len(encodedData)
+
+    input("Press Enter to exit...")
 
 def decodeMenu():
     print("Decode menu (WiP)\n")
