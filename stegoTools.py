@@ -155,7 +155,7 @@ def encodingInformation(filePath, hash):
     totalBits = len(encodedData)
     totalPixels = math.ceil(totalBits / 3)
 
-    encodingSettings(totalBits, totalPixels, hash)
+    printEncodingSettings(totalBits, totalPixels, hash)
 
     print("\n★ Would you like to proceed with encoding this message? ★")
     confirmation = input('Enter "yes" or "no": ').lower()
@@ -205,7 +205,7 @@ def encodingInformation(filePath, hash):
     if menuSelection == QUITAPP:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
         input("Press Enter to Continue...")
-        quit()
+        exit()
 
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
@@ -289,7 +289,7 @@ def decodeInformationFootprint(filePath):
     if menuSelection == QUITAPP:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
         input("Press Enter to Continue...")
-        quit()
+        exit()
 
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")

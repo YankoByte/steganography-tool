@@ -16,6 +16,10 @@ BITTOBYTE = 1 / 8
 VARWARNING = 500
 ENTWARNING = 5
 
+RCHAN = 0
+GCHAN = 1
+BCHAN = 2
+
 
 def clearTerminal():
     if os.name == "nt":
@@ -76,29 +80,12 @@ def calcTotalVariance(filePath):
     pixels = np.array(img)
     return round(np.var(pixels), 2)
 
-
-def calcRedVariance(filePath):
+def calcChannelVariance(filePath, channel):
     img = Image.open(filePath).convert("RGB")
     data = np.array(img)
 
-    redChannel = data[:, :, 0].flatten()
-    return round(np.var(redChannel), 2)
-
-
-def calcGreenVariance(filePath):
-    img = Image.open(filePath).convert("RGB")
-    data = np.array(img)
-
-    greenChannel = data[:, :, 1].flatten()
-    return round(np.var(greenChannel), 2)
-
-
-def calcBlueVariance(filePath):
-    img = Image.open(filePath).convert("RGB")
-    data = np.array(img)
-
-    blueChannel = data[:, :, 2].flatten()
-    return round(np.var(blueChannel), 2)
+    channelData = data[:, :, channel].flatten()
+    return round(np.var(channelData), 2)
 
 
 def calcTotalEntropy(filePath):
@@ -106,7 +93,11 @@ def calcTotalEntropy(filePath):
     return round(img.entropy(), 2)
 
 
-def calcChannelEntropy(channelData):
+def calcChannelEntropy(filePath, channel):
+    img = Image.open(filePath).convert("RGB")
+    data = np.array(img)
+    channelData = data[:, :, channel].flatten()
+
     counts = Counter(channelData)
     total = len(channelData)
     entropy = 0.0
@@ -116,31 +107,7 @@ def calcChannelEntropy(channelData):
         entropySum = p * math.log2(p)
         entropy -= entropySum
 
-    return entropy
-
-
-def calcRedEntropy(filePath):
-    img = Image.open(filePath).convert("RGB")
-    data = np.array(img)
-
-    redChannel = data[:, :, 0].flatten()
-    return round(calcChannelEntropy(redChannel), 2)
-
-
-def calcGreenEntropy(filePath):
-    img = Image.open(filePath).convert("RGB")
-    data = np.array(img)
-
-    greenChannel = data[:, :, 1].flatten()
-    return round(calcChannelEntropy(greenChannel), 2)
-
-
-def calcBlueEntropy(filePath):
-    img = Image.open(filePath).convert("RGB")
-    data = np.array(img)
-
-    blueChannel = data[:, :, 2].flatten()
-    return round(calcChannelEntropy(blueChannel), 2)
+    return round(entropy, 2)
 
 
 def printEncodingMenu():
@@ -196,13 +163,13 @@ def printStegHeuristics(filePath):
     totalVariance = calcTotalVariance(filePath)
     totalEntropy = calcTotalEntropy(filePath)
 
-    rVar = calcRedVariance(filePath)
-    gVar = calcGreenVariance(filePath)
-    bVar = calcBlueVariance(filePath)
+    rVar = calcChannelVariance(filePath, RCHAN)
+    gVar = calcChannelVariance(filePath, GCHAN)
+    bVar = calcChannelVariance(filePath, BCHAN)
 
-    rEnt = calcRedEntropy(filePath)
-    gEnt = calcGreenEntropy(filePath)
-    bEnt = calcBlueEntropy(filePath)
+    rEnt = calcChannelEntropy(filePath, RCHAN)
+    gEnt = calcChannelEntropy(filePath, GCHAN)
+    bEnt = calcChannelEntropy(filePath, BCHAN)
 
     print("╔═════════════ STENOGRAPHIC HEURISTICS ═══════════════════════╗")
     print(f"║ Total Variance: {totalVariance}                                     ║")
@@ -222,7 +189,7 @@ def printStegHeuristics(filePath):
         )
 
 
-def encodingSettings(numBits, numPixels, hash):
+def printEncodingSettings(numBits, numPixels, hash):
     print("\n╔═══════════════ ENCODING SETTINGS ═════════════════╗")
     print(f"║ Bits Encoded: {numBits} bits    ║")
     print(f"║ Pixels Used: {numPixels}    ║")
