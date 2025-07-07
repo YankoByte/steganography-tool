@@ -12,8 +12,12 @@ QUITAPP = "quit"
 QUITNUMBER = "3"
 EXTPNG = ".png"
 
+TEXTINPUT = "1"
+FILEINPUT = "2"
+
 BYTETOKILOBYTE = 1 / 1000
 BITTOBYTE = 1 / 8
+BYTETOBIT = 8
 RGBCHANNELS = 3
 BYTETOBIT = 8
 
@@ -30,6 +34,10 @@ ENTWARNING = 5
 
 HASHSIZE = 64
 HASHHALF = 32
+
+EXTHEADER = "EXT="
+DEFAULTHEADER = "Text "
+DEFAULTOFFSET = 9
 
 # Note to self, the plaintext is "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
@@ -76,11 +84,11 @@ def encodeMenu():
 
 
 def encodingSettings(filePath):
-    size = os.path.getsize(filePath) * BYTETOKILOBYTE
+    fileSize = os.path.getsize(filePath) * BYTETOKILOBYTE
     fileName = os.path.basename(filePath)
     extension = os.path.splitext(filePath)[1]
 
-    printFileStats(filePath, fileName, size, extension)
+    printFileStats(filePath, fileName, fileSize, extension)
 
     if extension != EXTPNG:
         print(
@@ -139,20 +147,49 @@ def encodingFingerprint(filePath):
 
 
 def encodingInformation(filePath, hash):
+    encodingHeader = "EXT="
     if hash == DEFAULTHASH:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
         )
 
-    info = input("Enter information to encode: ")
+    printEncodingSelections()
+    encodingSelection = input("Option Selected: ").lower()
 
-    if info == "":
+    if encodingSelection == TEXTINPUT:
+        encodingHeader += DEFAULTHEADER
+        info = input("Enter text to encode: ")
+        if info == "":
+            clearTerminal()
+            print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
+            encodingInformation(filePath, hash)
+        encodingHeader += info
+    elif encodingSelection == FILEINPUT:
+        print("⚠ !!WiP!! ⚠\n")
+        print("Enter the full file path (including name and extension): \n")
+        input("WIP!!!...")
+        quit()
+    else:
         clearTerminal()
-        print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
+        print("❗ Error - Please Type a Valid Option ❗\n")
         encodingInformation(filePath, hash)
 
-    encodedData = dataEncoder(info, hash)
+    encodedData = dataEncoder(encodingHeader, hash)
     totalBits = len(encodedData)
+
+    im = Image.open(filePath)
+    width, height = im.size
+    encodeLimit = width * height * RGBCHANNELS
+    if totalBits > encodeLimit:
+        print("\n⚠ WARNING: The data you're trying to encode exceeds the image's capacity")
+        print(f"  ★ Required bits: {totalBits}")
+        print(f"  ★ Max capacity: {encodeLimit}\n")
+        input("Press Enter to Continue...")
+
+        clearTerminal()
+        print("★ Returning to encoding information... ★\n")
+        encodingInformation(filePath, hash)
+
     totalPixels = math.ceil(totalBits / 3)
 
     printEncodingSettings(totalBits, totalPixels, hash)
@@ -175,9 +212,7 @@ def encodingInformation(filePath, hash):
     else:
         outputName += ".png"
 
-    im = Image.open(filePath)
     img = im.load()
-    width, height = im.size
 
     for i in range(totalPixels):
         currentX = i % width
@@ -279,8 +314,13 @@ def decodeInformationFootprint(filePath):
         )
         print("╚════════════════════════════╝")
 
-        actualInformation = slice(startIndex + HASHHALF, endIndex)
-        print(f"Decoded Information: {asciiOutput[actualInformation]}")
+        rawInformation = slice(startIndex + HASHHALF, endIndex)
+        asciiOutput = asciiOutput[rawInformation]
+        
+        if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
+           print("\n★ Information Type: Text ★\n")
+        
+        print(f"Decoded Information: {asciiOutput[9:]}")
     else:
         print("\n❗ Error - no Information Could be Found ❗")
 

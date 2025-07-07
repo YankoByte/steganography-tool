@@ -139,11 +139,11 @@ def printDecodeMenu():
     print("╚═══════════════════════════════════════════════════════════════╝")
 
 
-def printFileStats(filePath, fileName, size, extension):
+def printFileStats(filePath, fileName, fileSize, extension):
     print("╔═══════════════ FILE STATS ═══════════════╗")
     print(f"║ Full File Directory: {filePath}    ║")
     print(f"║ File Name: {fileName}                   ║")
-    print(f"║ File Size: {size} kB                    ║")
+    print(f"║ File Size: {fileSize} kB                    ║")
     print(f"║ File Extension: {extension}               ║")
     print("╚══════════════════════════════════════════╝")
 
@@ -195,3 +195,11 @@ def printEncodingSettings(numBits, numPixels, hash):
     print(f"║ Pixels Used: {numPixels}    ║")
     print(f"║ Fingerprint Used: {hash}    ║")
     print("╚═════════════════════════════════════════════╝")
+
+def printEncodingSelections():
+    print("╔════════════════════ DATA INPUT MODE (WiP) ══════════════════════╗")
+    print("║ Options                                                         ║")
+    print("║ ★ Type '1' to manually enter plain text to encode.              ║")
+    print("║ ★ Type '2' to load raw binary data from a file (any format).    ║")
+    print("║                                                                 ║")
+    print("╚═════════════════════════════════════════════════════════════════╝")
