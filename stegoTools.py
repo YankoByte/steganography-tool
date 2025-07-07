@@ -34,12 +34,7 @@ DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 print("★ Stego Tools v1.4 ★\n")
 
 def mainMenu():
-    print("╔══════ MAIN MENU ═════╗")
-    print("║ Options              ║")
-    print("║ 1. Encoding Suite    ║")
-    print("║ 2. Decoding Suite    ║")
-    print("║ 3. Quit App          ║")
-    print("╚══════════════════════╝")
+    printMainMenu()
 
     mainMenuOption = input("Option Selected: ")
     if mainMenuOption == ENCODE:
@@ -57,13 +52,7 @@ def mainMenu():
         mainMenu()
 
 def encodeMenu():
-    print("╔═════════════════════ ENCODING MENU (WiP) ═════════════════════╗")
-    print("║ Options                                                       ║")
-    print("║ ★ Enter the full file path (including name and extension)     ║")
-    print("║    to select an image for encoding.                           ║")
-    print("║                                                               ║")
-    print('║ ★ To return to the main menu, type "return".                  ║')
-    print("╚═══════════════════════════════════════════════════════════════╝")
+    printEncodingMenu()
 
     encodeSelection = input("Option Selected: ")
     if encodeSelection.lower() == RETURNMAIN:
@@ -80,17 +69,12 @@ def encodeMenu():
         print("❗ Error - File Does Not Exist! ❗\n")
         encodeMenu()
 
-def encodingSettings(fileDirectory):
-    size = os.path.getsize(fileDirectory) * BYTETOKILOBYTE
-    fileName = os.path.basename(fileDirectory)
-    extension = os.path.splitext(fileDirectory)[1]
+def encodingSettings(filePath):
+    size = os.path.getsize(filePath) * BYTETOKILOBYTE
+    fileName = os.path.basename(filePath)
+    extension = os.path.splitext(filePath)[1]
 
-    print("╔═══════════════ FILE STATS ═══════════════╗")
-    print(f'║ Full File Directory: {fileDirectory}    ║')
-    print(f"║ File Name: {fileName}                   ║")
-    print(f'║ File Size: {size} kB                    ║')
-    print(f'║ File Extension: {extension}               ║')
-    print("╚══════════════════════════════════════════╝")
+    printFileStats(filePath, fileName, size, extension)
 
     if extension != EXTPNG:
         print(f"\nPlease use a supported format, the {extension} format is currently not supported")
@@ -99,39 +83,8 @@ def encodingSettings(fileDirectory):
         print("★ Returning to encoding menu... ★\n")
         encodeMenu()
 
-    im = Image.open(fileDirectory)
-    width, height = im.size
-    encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
-
-    totalVariance = calcTotalVariance(fileDirectory)
-    totalEntropy = calcTotalEntropy(fileDirectory)
-
-    rVar = calcRedVariance(fileDirectory)
-    gVar = calcGreenVariance(fileDirectory)
-    bVar = calcBlueVariance(fileDirectory)
-
-    rEnt = calcRedEntropy(fileDirectory)
-    gEnt = calcGreenEntropy(fileDirectory)
-    bEnt = calcBlueEntropy(fileDirectory)
-
-    print("╔═══════════════ IMAGE STATS ═════════════════╗")
-    print(f'║ Dimensions: {width}px x {height}px         ║')
-    print(f"║ Encodable Information: {encodeLimit} kB    ║")
-    print("╚═════════════════════════════════════════════╝")
-
-    print("╔═════════════ STENOGRAPHIC HEURISTICS ═══════════════════════╗")
-    print(f'║ Total Variance: {totalVariance}                                     ║')
-    print(f'║ Channel Variance (RGB): [{rVar}, {gVar}, {bVar}]          ║')
-    print(f'║ Entropy: {totalEntropy}                                               ║')
-    print(f'║ Channel Entropy (RGB): [{rEnt}, {gEnt}, {bEnt}]                   ║')
-    print("╚═════════════════════════════════════════════════════════════╝")
-
-    if (rEnt < ENTWARNING or gEnt < ENTWARNING or bEnt < ENTWARNING):
-        print("\n⚠ WARNING: One or more channels have low entropy. Consider a more complex image ⚠")
-
-    if (rVar < VARWARNING or gVar < VARWARNING or bVar < VARWARNING):
-        print("\n⚠ WARNING: One or more channels have low variance. Consider a more complex image ⚠")
-
+    printImageStats(filePath)
+    printStegHeuristics(filePath)
 
     print('\n★ Do you want to embed data in this image? ★')
     encodingConfirmation = input('Enter "yes" or "no": ').lower()
@@ -139,7 +92,7 @@ def encodingSettings(fileDirectory):
     if encodingConfirmation == CONFIRM or encodingConfirmation == CONFIRM2:
         clearTerminal()
         print('★ Success — Proceeding to Fingerprinting Settings... ★\n')
-        encodingFingerprint(fileDirectory)
+        encodingFingerprint(filePath)
     elif encodingConfirmation == DENY or encodingConfirmation == DENY2:
         clearTerminal()
         print("★ Returning to encoding menu... ★\n")
@@ -147,11 +100,11 @@ def encodingSettings(fileDirectory):
     else:
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
-        encodingSettings(fileDirectory)
+        encodingSettings(filePath)
 
-def encodingFingerprint(fileDirectory):
+def encodingFingerprint(filePath):
     hash = DEFAULTHASH
-    fileName = os.path.basename(fileDirectory)
+    fileName = os.path.basename(filePath)
 
     print(f'★ Do you want to use a custom fingerprint to identify "{fileName}"? ★')
     fingerprintChoice = input('Enter "yes" or "no": ').lower()
@@ -165,7 +118,7 @@ def encodingFingerprint(fileDirectory):
     elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
-        encodingFingerprint(fileDirectory)
+        encodingFingerprint(filePath)
 
     print(f"\n★ Fingerprint has been created: {hash} ★\n")
 
@@ -173,9 +126,9 @@ def encodingFingerprint(fileDirectory):
     clearTerminal()
 
     print('★ Success — Proceeding to Encoding Settings... ★\n')
-    encodingInformation(fileDirectory, hash)
+    encodingInformation(filePath, hash)
 
-def encodingInformation(fileDirectory, hash):
+def encodingInformation(filePath, hash):
     if hash == DEFAULTHASH:
         print("⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n")
 
@@ -184,17 +137,13 @@ def encodingInformation(fileDirectory, hash):
     if info == "":
         clearTerminal()
         print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
-        encodingInformation(fileDirectory, hash)
+        encodingInformation(filePath, hash)
 
     encodedData = dataEncoder(info, hash)
     totalBits = len(encodedData)
     totalPixels = math.ceil(totalBits / 3)
 
-    print("\n╔═══════════════ ENCODING SETTINGS ═════════════════╗")
-    print(f'║ Bits Encoded: {totalBits} bits    ║')
-    print(f"║ Pixels Used: {totalPixels}    ║")
-    print(f"║ Fingerprint Used: {hash}    ║")
-    print("╚═════════════════════════════════════════════╝")
+    encodingSettings(totalBits, totalPixels, hash)
 
     print("\n★ Would you like to proceed with encoding this message? ★")
     confirmation = input('Enter "yes" or "no": ').lower()
@@ -205,7 +154,7 @@ def encodingInformation(fileDirectory, hash):
     elif confirmation != CONFIRM and confirmation != CONFIRM2:
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
-        encodingInformation(fileDirectory, hash)
+        encodingInformation(filePath, hash)
 
     print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
     outputName = input("Output Name: ")
@@ -214,7 +163,7 @@ def encodingInformation(fileDirectory, hash):
     else: 
         outputName += ".png"
 
-    im = Image.open(fileDirectory)
+    im = Image.open(filePath)
     img = im.load()
     width, height = im.size
 
@@ -249,13 +198,7 @@ def encodingInformation(fileDirectory, hash):
     mainMenu()
 
 def decodeMenu():
-    print("╔═════════════════════ DECODING MENU (WiP) ═════════════════════╗")
-    print("║ Options                                                       ║")
-    print("║ ★ Enter the full file path (including name and extension)     ║")
-    print("║    to select an image for decoding.                           ║")
-    print("║                                                               ║")
-    print('║ ★ To return to the main menu, type "return".                  ║')
-    print("╚═══════════════════════════════════════════════════════════════╝")
+    printDecodeMenu()
 
     decodeSelection = input("Option Selected: ")
     if decodeSelection.lower() == RETURNMAIN:
@@ -277,7 +220,7 @@ def decodeMenu():
     clearTerminal()
     mainMenu()
 
-def decodeInformationFootprint(fileDirectory):
+def decodeInformationFootprint(filePath):
     print("★ Please enter your fingerprint. If left blank, the default fingerprint 'steganography' will be used. ★\n")
     hashPlainText = input("Please input your footprint: ")
     if hashPlainText == "":
@@ -292,11 +235,11 @@ def decodeInformationFootprint(fileDirectory):
     firstFingerprint = hash[firstHalf]
     lastFingerprint = hash[lastHalf]
 
-    im = Image.open(fileDirectory)
+    im = Image.open(filePath)
     width, height = im.size
     totalBits = width * height * RGBCHANNELS
 
-    lsbString = extractLSBBits(fileDirectory, totalBits)
+    lsbString = extractLSBBits(filePath, totalBits)
     # print(f"\nFirst {len(lsb_string)} LSB bits:\n{lsb_string}")
 
     asciiOutput = bitsToAscii(lsbString)

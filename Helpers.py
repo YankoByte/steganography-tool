@@ -9,6 +9,13 @@ from collections import Counter
 
 HASHSIZE = 64
 
+RGBCHANNELS = 3
+BYTETOKILOBYTE = 1/1000
+BITTOBYTE = 1/8
+
+VARWARNING = 500
+ENTWARNING = 5
+
 def clearTerminal():
     if os.name == 'nt':
         os.system('cls')
@@ -32,9 +39,9 @@ def dataEncoder(info, hash):
     data = firstFingerprint + info + lastFingerprint
     return stringToBinary(data)
 
-def extractLSBBits(fileDirectory, totalBits):
+def extractLSBBits(filePath, totalBits):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
-    im = Image.open(fileDirectory).convert("RGB")
+    im = Image.open(filePath).convert("RGB")
     pixels = im.load()
     width, height = im.size
 
@@ -57,34 +64,34 @@ def bitsToAscii(bitString):
         chars.append(ascii_char)
     return ''.join(chars)
 
-def calcTotalVariance(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcTotalVariance(filePath):
+    img = Image.open(filePath).convert('RGB')
     pixels = np.array(img)
     return round(np.var(pixels), 2)
 
-def calcRedVariance(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcRedVariance(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     redChannel = data[:, :, 0].flatten()
     return round(np.var(redChannel), 2)
 
-def calcGreenVariance(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcGreenVariance(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     greenChannel = data[:, :, 1].flatten()
     return round(np.var(greenChannel), 2)
 
-def calcBlueVariance(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcBlueVariance(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     blueChannel = data[:, :, 2].flatten()
     return round(np.var(blueChannel), 2)
 
-def calcTotalEntropy(fileDirectory):
-    img = Image.open(fileDirectory).convert('L')
+def calcTotalEntropy(filePath):
+    img = Image.open(filePath).convert('L')
     return round(img.entropy(), 2)
 
 def calcChannelEntropy(channelData):
@@ -99,23 +106,100 @@ def calcChannelEntropy(channelData):
 
     return entropy
 
-def calcRedEntropy(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcRedEntropy(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     redChannel = data[:, :, 0].flatten()
     return round(calcChannelEntropy(redChannel), 2)
 
-def calcGreenEntropy(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcGreenEntropy(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     greenChannel = data[:, :, 1].flatten()
     return round(calcChannelEntropy(greenChannel), 2)
 
-def calcBlueEntropy(fileDirectory):
-    img = Image.open(fileDirectory).convert('RGB')
+def calcBlueEntropy(filePath):
+    img = Image.open(filePath).convert('RGB')
     data = np.array(img)
 
     blueChannel = data[:, :, 2].flatten()
     return round(calcChannelEntropy(blueChannel), 2)
+
+def printEncodingMenu():
+    print("╔═════════════════════ ENCODING MENU (WiP) ═════════════════════╗")
+    print("║ Options                                                       ║")
+    print("║ ★ Enter the full file path (including name and extension)     ║")
+    print("║    to select an image for encoding.                           ║")
+    print("║                                                               ║")
+    print('║ ★ To return to the main menu, type "return".                  ║')
+    print("╚═══════════════════════════════════════════════════════════════╝")
+
+def printMainMenu():
+    print("╔══════ MAIN MENU ═════╗")
+    print("║ Options              ║")
+    print("║ 1. Encoding Suite    ║")
+    print("║ 2. Decoding Suite    ║")
+    print("║ 3. Quit App          ║")
+    print("╚══════════════════════╝")
+
+def printDecodeMenu():
+    print("╔═════════════════════ DECODING MENU (WiP) ═════════════════════╗")
+    print("║ Options                                                       ║")
+    print("║ ★ Enter the full file path (including name and extension)     ║")
+    print("║    to select an image for decoding.                           ║")
+    print("║                                                               ║")
+    print('║ ★ To return to the main menu, type "return".                  ║')
+    print("╚═══════════════════════════════════════════════════════════════╝")
+
+def printFileStats(filePath, fileName, size, extension):
+    print("╔═══════════════ FILE STATS ═══════════════╗")
+    print(f'║ Full File Directory: {filePath}    ║')
+    print(f"║ File Name: {fileName}                   ║")
+    print(f'║ File Size: {size} kB                    ║')
+    print(f'║ File Extension: {extension}               ║')
+    print("╚══════════════════════════════════════════╝")
+
+def printImageStats(filePath):
+    im = Image.open(filePath)
+    width, height = im.size
+    encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
+
+    print("╔═══════════════ IMAGE STATS ═════════════════╗")
+    print(f'║ Dimensions: {width}px x {height}px         ║')
+    print(f"║ Encodable Information: {encodeLimit} kB    ║")
+    print("╚═════════════════════════════════════════════╝")
+
+
+def printStegHeuristics(filePath):
+    totalVariance = calcTotalVariance(filePath)
+    totalEntropy = calcTotalEntropy(filePath)
+
+    rVar = calcRedVariance(filePath)
+    gVar = calcGreenVariance(filePath)
+    bVar = calcBlueVariance(filePath)
+
+    rEnt = calcRedEntropy(filePath)
+    gEnt = calcGreenEntropy(filePath)
+    bEnt = calcBlueEntropy(filePath)
+
+    print("╔═════════════ STENOGRAPHIC HEURISTICS ═══════════════════════╗")
+    print(f'║ Total Variance: {totalVariance}                                     ║')
+    print(f'║ Channel Variance (RGB): [{rVar}, {gVar}, {bVar}]          ║')
+    print(f'║ Entropy: {totalEntropy}                                               ║')
+    print(f'║ Channel Entropy (RGB): [{rEnt}, {gEnt}, {bEnt}]                   ║')
+    print("╚═════════════════════════════════════════════════════════════╝")
+
+    if (rEnt < ENTWARNING or gEnt < ENTWARNING or bEnt < ENTWARNING):
+        print("\n⚠ WARNING: One or more channels have low entropy. Consider a more complex image ⚠")
+
+    if (rVar < VARWARNING or gVar < VARWARNING or bVar < VARWARNING):
+        print("\n⚠ WARNING: One or more channels have low variance. Consider a more complex image ⚠")
+
+def encodingSettings(numBits, numPixels, hash):
+    print("\n╔═══════════════ ENCODING SETTINGS ═════════════════╗")
+    print(f'║ Bits Encoded: {numBits} bits    ║')
+    print(f"║ Pixels Used: {numPixels}    ║")
+    print(f"║ Fingerprint Used: {hash}    ║")
+    print("╚═════════════════════════════════════════════╝")
