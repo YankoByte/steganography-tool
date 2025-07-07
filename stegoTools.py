@@ -20,6 +20,9 @@ CONFIRM2 = "y"
 DENY = "no"
 DENY2 = "n"
 
+NULLBIT = "0"
+POSBIT = "1"
+
 # Note to self, the plaintext is "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 
@@ -129,14 +132,23 @@ def encodingInformation(fileDirectory, hash):
         currentX = i % width
         currentY = math.floor(i / width)
 
-        print("\nInfo -", img[currentX, currentY])
+        pixel = list(img[currentX, currentY])
+
+        print("\nInfo -", pixel)
 
         for j in range(RGBCHANNELS):
             bitIndex = i * 3 + j
             if bitIndex >= totalBits:
                 break
 
-            print(f"Pixel ({currentX}, {currentY}) - BitIndex {bitIndex} | LSB {encodedData[bitIndex]}")
+            print(f"Pixel ({currentX}, {currentY}) - BitIndex {bitIndex} | channelIndex {j} | LSB {encodedData[bitIndex]}")
+
+            pixel[j] = (pixel[j] & ~1) | int(encodedData[bitIndex])
+
+        img[currentX, currentY] = tuple(pixel)
+        im.save("output.png")
+        pixel = list(img[currentX, currentY])
+        print("Info -", pixel)
 
     input("Press Enter to exit...")
 
