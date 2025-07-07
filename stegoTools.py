@@ -12,8 +12,8 @@ QUITAPP = "quit"
 QUITNUMBER = "3"
 EXTPNG = ".png"
 
-BYTETOKILOBYTE = 1/1000
-BITTOBYTE = 1/8
+BYTETOKILOBYTE = 1 / 1000
+BITTOBYTE = 1 / 8
 RGBCHANNELS = 3
 BYTETOBIT = 8
 
@@ -28,10 +28,14 @@ POSBIT = "1"
 VARWARNING = 500
 ENTWARNING = 5
 
+HASHSIZE = 64
+HASHHALF = 32
+
 # Note to self, the plaintext is "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 
 print("★ Stego Tools v1.4 ★\n")
+
 
 def mainMenu():
     printMainMenu()
@@ -45,11 +49,12 @@ def mainMenu():
         decodeMenu()
     elif mainMenuOption == QUITNUMBER:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input('Press Enter to Continue...')
+        input("Press Enter to Continue...")
     else:
         clearTerminal()
         print("★ Choose either option 1 or option 2 to continue. ★\n")
         mainMenu()
+
 
 def encodeMenu():
     printEncodingMenu()
@@ -69,6 +74,7 @@ def encodeMenu():
         print("❗ Error - File Does Not Exist! ❗\n")
         encodeMenu()
 
+
 def encodingSettings(filePath):
     size = os.path.getsize(filePath) * BYTETOKILOBYTE
     fileName = os.path.basename(filePath)
@@ -77,7 +83,9 @@ def encodingSettings(filePath):
     printFileStats(filePath, fileName, size, extension)
 
     if extension != EXTPNG:
-        print(f"\nPlease use a supported format, the {extension} format is currently not supported")
+        print(
+            f"\nPlease use a supported format, the {extension} format is currently not supported"
+        )
         input("\nPress Enter to return to the encoding menu...")
         clearTerminal()
         print("★ Returning to encoding menu... ★\n")
@@ -86,12 +94,12 @@ def encodingSettings(filePath):
     printImageStats(filePath)
     printStegHeuristics(filePath)
 
-    print('\n★ Do you want to embed data in this image? ★')
+    print("\n★ Do you want to embed data in this image? ★")
     encodingConfirmation = input('Enter "yes" or "no": ').lower()
 
     if encodingConfirmation == CONFIRM or encodingConfirmation == CONFIRM2:
         clearTerminal()
-        print('★ Success — Proceeding to Fingerprinting Settings... ★\n')
+        print("★ Success — Proceeding to Fingerprinting Settings... ★\n")
         encodingFingerprint(filePath)
     elif encodingConfirmation == DENY or encodingConfirmation == DENY2:
         clearTerminal()
@@ -102,6 +110,7 @@ def encodingSettings(filePath):
         print("❗ Error - Please Type a Valid Option ❗\n")
         encodingSettings(filePath)
 
+
 def encodingFingerprint(filePath):
     hash = DEFAULTHASH
     fileName = os.path.basename(filePath)
@@ -109,7 +118,7 @@ def encodingFingerprint(filePath):
     print(f'★ Do you want to use a custom fingerprint to identify "{fileName}"? ★')
     fingerprintChoice = input('Enter "yes" or "no": ').lower()
     if fingerprintChoice == CONFIRM or fingerprintChoice == CONFIRM2:
-        fingerprint = input('Enter Fingerprint: ')
+        fingerprint = input("Enter Fingerprint: ")
 
         if fingerprint == "":
             hash = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
@@ -122,15 +131,18 @@ def encodingFingerprint(filePath):
 
     print(f"\n★ Fingerprint has been created: {hash} ★\n")
 
-    input('Press Enter to Continue...')
+    input("Press Enter to Continue...")
     clearTerminal()
 
-    print('★ Success — Proceeding to Encoding Settings... ★\n')
+    print("★ Success — Proceeding to Encoding Settings... ★\n")
     encodingInformation(filePath, hash)
+
 
 def encodingInformation(filePath, hash):
     if hash == DEFAULTHASH:
-        print("⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n")
+        print(
+            "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
+        )
 
     info = input("Enter information to encode: ")
 
@@ -160,7 +172,7 @@ def encodingInformation(filePath, hash):
     outputName = input("Output Name: ")
     if outputName == "":
         outputName = "output.png"
-    else: 
+    else:
         outputName += ".png"
 
     im = Image.open(filePath)
@@ -184,18 +196,21 @@ def encodingInformation(filePath, hash):
         pixel = list(img[currentX, currentY])
 
     im.save(outputName)
-    print(f'\n★ Success — Information has been Successfully Embedded Into "{outputName}". ★')
+    print(
+        f'\n★ Success — Information has been Successfully Embedded Into "{outputName}". ★'
+    )
 
     print('\n★ Press Enter to return to the menu, or type "quit" to exit. ★')
     menuSelection = input("Option Selected: ").lower()
     if menuSelection == QUITAPP:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input('Press Enter to Continue...')
+        input("Press Enter to Continue...")
         quit()
-    
+
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
     mainMenu()
+
 
 def decodeMenu():
     printDecodeMenu()
@@ -220,8 +235,11 @@ def decodeMenu():
     clearTerminal()
     mainMenu()
 
+
 def decodeInformationFootprint(filePath):
-    print("★ Please enter your fingerprint. If left blank, the default fingerprint 'steganography' will be used. ★\n")
+    print(
+        "★ Please enter your fingerprint. If left blank, the default fingerprint 'steganography' will be used. ★\n"
+    )
     hashPlainText = input("Please input your footprint: ")
     if hashPlainText == "":
         hashPlainText = "steganography"
@@ -230,8 +248,8 @@ def decodeInformationFootprint(filePath):
     print(f'★ Decoding data using fingerprint, "{hashPlainText}" ★')
 
     hash = hashGenerator(hashPlainText)
-    firstHalf = slice(HASHSIZE//2)
-    lastHalf = slice(HASHSIZE//2, HASHSIZE)
+    firstHalf = slice(HASHHALF)
+    lastHalf = slice(HASHHALF, HASHSIZE)
     firstFingerprint = hash[firstHalf]
     lastFingerprint = hash[lastHalf]
 
@@ -249,29 +267,33 @@ def decodeInformationFootprint(filePath):
         startIndex = asciiOutput.find(firstFingerprint)
         endIndex = asciiOutput.find(lastFingerprint)
 
-        print(f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n")
+        print(
+            f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
+        )
 
         print("╔═══ ENCODED INFORMATION ════╗")
-        print(f'║ Message Start Index: {startIndex + HASHSIZE // 2}    ║')
+        print(f"║ Message Start Index: {startIndex + HASHHALF}    ║")
         print(f"║ Message End Index: {endIndex - 1}      ║    ")
-        print(f"║ Message Length: {endIndex - startIndex - HASHSIZE // 2}          ║    ")
+        print(
+            f"║ Message Length: {endIndex - startIndex - HASHHALF}          ║    "
+        )
         print("╚════════════════════════════╝")
 
-        actualInformation = slice(startIndex + HASHSIZE//2, endIndex)
+        actualInformation = slice(startIndex + HASHHALF, endIndex)
         print(f"Decoded Information: {asciiOutput[actualInformation]}")
     else:
         print("\n❗ Error - no Information Could be Found ❗")
-
 
     print('\n★ Press Enter to return to the menu, or type "quit" to exit. ★')
     menuSelection = input("Option Selected: ").lower()
     if menuSelection == QUITAPP:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input('Press Enter to Continue...')
+        input("Press Enter to Continue...")
         quit()
-    
+
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
     mainMenu()
+
 
 mainMenu()
