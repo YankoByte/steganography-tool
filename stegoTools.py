@@ -37,6 +37,7 @@ HASHHALF = 32
 
 EXTHEADER = "EXT="
 DEFAULTHEADER = "Text "
+PLACEHOLDERHEADER = "!!!! "
 DEFAULTOFFSET = 9
 
 # Note to self, the plaintext is "steganography"
@@ -130,7 +131,7 @@ def encodingFingerprint(filePath):
         fingerprint = input("Enter Fingerprint: ")
 
         if fingerprint == "":
-            hash = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
+            hash = DEFAULTHASH
         else:
             hash = hashGenerator(fingerprint)
     elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
@@ -166,10 +167,14 @@ def encodingInformation(filePath, hash):
             encodingInformation(filePath, hash)
         encodingHeader += info
     elif encodingSelection == FILEINPUT:
+        encodingHeader += PLACEHOLDERHEADER
         print("⚠ !!WiP!! ⚠\n")
         print("Enter the full file path (including name and extension): \n")
         input("WIP!!!...")
-        quit()
+        newFilePath = input("\n\nFull File Directory: ")
+        with open(newFilePath, "rb") as imageFile:
+            info = base64.b64encode(imageFile.read()).decode('utf-8')
+            encodingHeader += info
     else:
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
@@ -319,9 +324,14 @@ def decodeInformationFootprint(filePath):
         asciiOutput = decryptText(TEMPKEY, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
+           decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
            print("\n★ Information Type: Text ★\n")
-        
-        print(f"Decoded Information: {asciiOutput[9:]}")
+           print(f"Decoded Information: {decodedInformation}")
+        else:
+            decodedInformation = asciiOutput[len(EXTHEADER + PLACEHOLDERHEADER):]
+            print(f"Decoded Information: {decodedInformation}")
+            outputPath = input("\n\nFull File Directory: ")
+            writeToFile(decodedInformation.encode(), outputPath)
     else:
         print("\n❗ Error - no Information Could be Found ❗")
 

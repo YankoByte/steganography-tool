@@ -77,6 +77,11 @@ def decryptText(key, encryptedData) -> str:
     
     return decrypted_data.decode('utf-8')
 
+def writeToFile(decodedInformation, outputFilePath):
+    binaryData = base64.b64decode(decodedInformation)
+    with open(outputFilePath, 'wb') as f:
+        f.write(binaryData)
+
 def extractLSBBits(filePath, totalBits):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
     im = Image.open(filePath).convert("RGB")
