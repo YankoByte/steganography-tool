@@ -41,6 +41,7 @@ DEFAULTOFFSET = 9
 
 # Note to self, the plaintext is "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
+TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
 print("★ Stego Tools v1.4 ★\n")
 
@@ -315,7 +316,7 @@ def decodeInformationFootprint(filePath):
         print("╚════════════════════════════╝")
 
         rawInformation = slice(startIndex + HASHHALF, endIndex)
-        asciiOutput = asciiOutput[rawInformation]
+        asciiOutput = decryptText(TEMPKEY, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
            print("\n★ Information Type: Text ★\n")

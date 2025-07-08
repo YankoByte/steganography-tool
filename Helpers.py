@@ -6,6 +6,10 @@ from PIL import Image
 import numpy as np
 import math
 from collections import Counter
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from os import urandom
+import base64
 
 HASHSIZE = 64
 
@@ -19,6 +23,8 @@ ENTWARNING = 5
 RCHAN = 0
 GCHAN = 1
 BCHAN = 2
+
+TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
 
 def clearTerminal():
@@ -43,10 +49,33 @@ def dataEncoder(info, hash):
 
     firstFingerprint = hash[firstHalf]
     lastFingerprint = hash[lastHalf]
+    encryptedData = encryptText(TEMPKEY, info)
 
-    data = firstFingerprint + info + lastFingerprint
+    data = firstFingerprint + encryptedData + lastFingerprint
     return stringToBinary(data)
 
+def encryptText(key, plainText):
+    iv = urandom(16)
+    
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    
+    ciphertext = encryptor.update(plainText.encode()) + encryptor.finalize()
+    
+    return base64.b64encode(iv + ciphertext).decode('utf-8')
+
+def decryptText(key, encryptedData) -> str:
+    encrypted_data_bytes = base64.b64decode(encryptedData)
+    
+    iv = encrypted_data_bytes[:16]
+    ciphertext = encrypted_data_bytes[16:]
+    
+    cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
+    decryptor = cipher.decryptor()
+    
+    decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
+    
+    return decrypted_data.decode('utf-8')
 
 def extractLSBBits(filePath, totalBits):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
