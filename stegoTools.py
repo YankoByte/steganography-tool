@@ -60,6 +60,7 @@ def mainMenu():
     elif mainMenuOption == QUITNUMBER:
         print("\nThank you for using Stego Tools v1.4. Goodbye!")
         input("Press Enter to Continue...")
+        exit()
     else:
         clearTerminal()
         print("★ Choose either option 1 or option 2 to continue. ★\n")
@@ -168,10 +169,9 @@ def encodingInformation(filePath, hash):
         encodingHeader += info
     elif encodingSelection == FILEINPUT:
         encodingHeader += PLACEHOLDERHEADER
-        print("⚠ !!WiP!! ⚠\n")
-        print("Enter the full file path (including name and extension): \n")
-        input("WIP!!!...")
-        newFilePath = input("\n\nFull File Directory: ")
+
+        print("\n★ Enter the full file path (including name and extension) ★")
+        newFilePath = input("Full File Directory: ")
         with open(newFilePath, "rb") as imageFile:
             info = base64.b64encode(imageFile.read()).decode('utf-8')
             encodingHeader += info
@@ -214,9 +214,7 @@ def encodingInformation(filePath, hash):
     print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
     outputName = input("Output Name: ")
     if outputName == "":
-        outputName = "output.png"
-    else:
-        outputName += ".png"
+        outputName = r"C:\Users\Vincent\Pictures\sTools\output.png"
 
     img = im.load()
 
