@@ -172,6 +172,11 @@ def encodingInformation(filePath, hash):
 
         print("\n★ Enter the full file path (including name and extension) ★")
         newFilePath = input("Full File Directory: ")
+        if os.path.isfile(newFilePath) == False:
+            clearTerminal()
+            print("❗ Error - File Does Not Exist! ❗\n")
+            encodingInformation(filePath, hash)
+
         with open(newFilePath, "rb") as imageFile:
             info = base64.b64encode(imageFile.read()).decode('utf-8')
             encodingHeader += info
