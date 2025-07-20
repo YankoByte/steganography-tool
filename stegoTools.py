@@ -150,41 +150,12 @@ def encodingFingerprint(filePath):
 
 
 def encodingInformation(filePath, hash):
-    encodingHeader = "EXT="
     if hash == DEFAULTHASH:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
         )
 
-    printEncodingSelections()
-    encodingSelection = input("Option Selected: ").lower()
-
-    if encodingSelection == TEXTINPUT:
-        encodingHeader += DEFAULTHEADER
-        info = input("Enter text to encode: ")
-        if info == "":
-            clearTerminal()
-            print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
-            encodingInformation(filePath, hash)
-        encodingHeader += info
-    elif encodingSelection == FILEINPUT:
-        encodingHeader += PLACEHOLDERHEADER
-
-        print("\n★ Enter the full file path (including name and extension) ★")
-        newFilePath = input("Full File Directory: ")
-        if os.path.isfile(newFilePath) == False:
-            clearTerminal()
-            print("❗ Error - File Does Not Exist! ❗\n")
-            encodingInformation(filePath, hash)
-
-        with open(newFilePath, "rb") as imageFile:
-            info = base64.b64encode(imageFile.read()).decode('utf-8')
-            encodingHeader += info
-    else:
-        clearTerminal()
-        print("❗ Error - Please Type a Valid Option ❗\n")
-        encodingInformation(filePath, hash)
-
+    encodingHeader = encodingSelection()
     encodedData = dataEncoder(encodingHeader, hash)
     totalBits = len(encodedData)
 
@@ -192,18 +163,18 @@ def encodingInformation(filePath, hash):
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS
     if totalBits > encodeLimit:
-        print("\n⚠ WARNING: The data you're trying to encode exceeds the image's capacity")
-        print(f"  ★ Required bits: {totalBits}")
-        print(f"  ★ Max capacity: {encodeLimit}\n")
-        input("Press Enter to Continue...")
-
-        clearTerminal()
-        print("★ Returning to encoding information... ★\n")
+        encodingErrorDisplay()
         encodingInformation(filePath, hash)
 
     totalPixels = math.ceil(totalBits / 3)
 
     printEncodingSettings(totalBits, totalPixels, hash)
+
+    print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
+    outputName = input("Output Name: ")
+    if outputName == "":
+        scriptDir = os.path.dirname(os.path.abspath(__file__))
+        outputName = scriptDir + r"\output.png"
 
     print("\n★ Would you like to proceed with encoding this message? ★")
     confirmation = input('Enter "yes" or "no": ').lower()
@@ -215,11 +186,6 @@ def encodingInformation(filePath, hash):
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
         encodingInformation(filePath, hash)
-
-    print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
-    outputName = input("Output Name: ")
-    if outputName == "":
-        outputName = r"C:\Users\Vincent\Pictures\sTools\output.png"
 
     img = im.load()
 
@@ -302,7 +268,7 @@ def decodeInformationFootprint(filePath):
     totalBits = width * height * RGBCHANNELS
 
     lsbString = extractLSBBits(filePath, totalBits)
-    # print(f"\nFirst {len(lsb_string)} LSB bits:\n{lsb_string}")
+
 
     asciiOutput = bitsToAscii(lsbString)
     # print(f"\nASCII Output:\n{asciiOutput}")

@@ -26,6 +26,16 @@ BCHAN = 2
 
 TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
+EXTHEADER = "EXT="
+DEFAULTHEADER = "Text "
+PLACEHOLDERHEADER = "!!!! "
+
+TEXTINPUT = "1"
+FILEINPUT = "2"
+
+DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
+
+
 
 def clearTerminal():
     if os.name == "nt":
@@ -234,3 +244,48 @@ def printEncodingSelections():
     print("║ ★ Type '2' to load raw binary data from a file (any format).    ║")
     print("║                                                                 ║")
     print("╚═════════════════════════════════════════════════════════════════╝")
+
+def encodingSelection():
+    encodingHeader = EXTHEADER
+
+    printEncodingSelections()
+    encodingSelection = input("Option Selected: ").lower()
+
+    if encodingSelection == TEXTINPUT:
+        encodingHeader += DEFAULTHEADER
+
+        info = input("Enter text to encode: ")
+        if info == "":
+            clearTerminal()
+            print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
+            encodingSelection
+        encodingHeader += info
+
+    elif encodingSelection == FILEINPUT:
+        encodingHeader += PLACEHOLDERHEADER
+
+        print("\n★ Enter the full file path (including name and extension) ★")
+        newFilePath = input("Full File Directory: ")
+        if os.path.isfile(newFilePath) == False:
+            clearTerminal()
+            print("❗ Error - File Does Not Exist! ❗\n")
+            encodingSelection
+
+        with open(newFilePath, "rb") as imageFile:
+            info = base64.b64encode(imageFile.read()).decode('utf-8')
+            encodingHeader += info
+    else:
+        clearTerminal()
+        print("❗ Error - Please Type a Valid Option ❗\n")
+        encodingSelection()
+
+    return encodingHeader
+
+def encodingErrorDisplay(totalBits, encodeLimit):
+    print("\n⚠ WARNING: The data you're trying to encode exceeds the image's capacity")
+    print(f"  ★ Required bits: {totalBits}")
+    print(f"  ★ Max capacity: {encodeLimit}\n")
+    input("Press Enter to Continue...")
+
+    clearTerminal()
+    print("★ Returning to encoding information... ★\n")
