@@ -315,13 +315,11 @@ def decodeInformationFootprint(filePath):
             f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
         )
 
-        print("╔═══ ENCODED INFORMATION ════╗")
-        print(f"║ Message Start Index: {startIndex + HASHHALF}    ║")
-        print(f"║ Message End Index: {endIndex - 1}      ║    ")
-        print(
-            f"║ Message Length: {endIndex - startIndex - HASHHALF}          ║    "
-        )
-        print("╚════════════════════════════╝")
+        print("═══ ENCODED INFORMATION ═══")
+        print(f"Message Start Index: {startIndex + HASHHALF}")
+        print(f"Message End Index: {endIndex - 1}")
+        print(f"Message Length: {endIndex - startIndex - HASHHALF}")
+
 
         rawInformation = slice(startIndex + HASHHALF, endIndex)
         asciiOutput = decryptText(TEMPKEY, asciiOutput[rawInformation])

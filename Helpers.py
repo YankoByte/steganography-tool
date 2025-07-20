@@ -174,12 +174,11 @@ def printDecodeMenu():
 
 
 def printFileStats(filePath, fileName, fileSize, extension):
-    print("╔═══════════════ FILE STATS ═══════════════╗")
-    print(f"║ Full File Directory: {filePath}    ║")
-    print(f"║ File Name: {fileName}                   ║")
-    print(f"║ File Size: {fileSize} kB                    ║")
-    print(f"║ File Extension: {extension}               ║")
-    print("╚══════════════════════════════════════════╝")
+    print("═══ FILE STATS ═══")
+    print(f"Full File Directory: {filePath}")
+    print(f"File Name: {fileName}")
+    print(f"File Size: {fileSize} kB")
+    print(f"File Extension: {extension}\n")
 
 
 def printImageStats(filePath):
@@ -187,10 +186,10 @@ def printImageStats(filePath):
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
 
-    print("╔═══════════════ IMAGE STATS ═════════════════╗")
-    print(f"║ Dimensions: {width}px x {height}px         ║")
-    print(f"║ Encodable Information: {encodeLimit} kB    ║")
-    print("╚═════════════════════════════════════════════╝")
+    print("═══ IMAGE STATS ═══")
+    print(f"Dimensions: {width}px x {height}px")
+    print(f"Encodable Information: {encodeLimit} kB\n")
+
 
 
 def printStegHeuristics(filePath):
@@ -205,12 +204,11 @@ def printStegHeuristics(filePath):
     gEnt = calcChannelEntropy(filePath, GCHAN)
     bEnt = calcChannelEntropy(filePath, BCHAN)
 
-    print("╔═════════════ STENOGRAPHIC HEURISTICS ═══════════════════════╗")
-    print(f"║ Total Variance: {totalVariance}                                     ║")
-    print(f"║ Channel Variance (RGB): [{rVar}, {gVar}, {bVar}]          ║")
-    print(f"║ Entropy: {totalEntropy}                                               ║")
-    print(f"║ Channel Entropy (RGB): [{rEnt}, {gEnt}, {bEnt}]                   ║")
-    print("╚═════════════════════════════════════════════════════════════╝")
+    print("═══ STENOGRAPHIC HEURISTICS ═══")
+    print(f"Total Variance: {totalVariance}")
+    print(f"Channel Variance: [{rVar}, {gVar}, {bVar}] (R,G,B)")
+    print(f"Entropy: {totalEntropy}")
+    print(f"Channel Entropy: [{rEnt}, {gEnt}, {bEnt}] (R,G,B)")
 
     if rEnt < ENTWARNING or gEnt < ENTWARNING or bEnt < ENTWARNING:
         print(
@@ -224,11 +222,10 @@ def printStegHeuristics(filePath):
 
 
 def printEncodingSettings(numBits, numPixels, hash):
-    print("\n╔═══════════════ ENCODING SETTINGS ═════════════════╗")
-    print(f"║ Bits Encoded: {numBits} bits    ║")
-    print(f"║ Pixels Used: {numPixels}    ║")
-    print(f"║ Fingerprint Used: {hash}    ║")
-    print("╚═════════════════════════════════════════════╝")
+    print("\n═══ ENCODING SETTINGS ═══")
+    print(f"Bits Encoded: {numBits} bits")
+    print(f"Pixels Used: {numPixels}")
+    print(f"Fingerprint Used: {hash}")
 
 def printEncodingSelections():
     print("╔════════════════════ DATA INPUT MODE (WiP) ══════════════════════╗")
