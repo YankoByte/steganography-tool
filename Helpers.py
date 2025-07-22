@@ -59,7 +59,8 @@ def dataEncoder(info, hash):
 
     firstFingerprint = hash[firstHalf]
     lastFingerprint = hash[lastHalf]
-    encryptedData = encryptText(TEMPKEY, info)
+    key = passwordToKey("steganography", b'static_salt')
+    encryptedData = encryptText(key, info)
 
     data = firstFingerprint + encryptedData + lastFingerprint
     return stringToBinary(data)
@@ -86,6 +87,10 @@ def decryptText(key, encryptedData) -> str:
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
     
     return decrypted_data.decode('utf-8')
+
+def passwordToKey(password, salt):
+    key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000, dklen=16)
+    return key
 
 def writeToFile(decodedInformation, outputFilePath):
     binaryData = base64.b64decode(decodedInformation)

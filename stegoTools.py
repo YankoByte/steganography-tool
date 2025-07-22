@@ -288,7 +288,8 @@ def decodeInformationFootprint(filePath):
 
 
         rawInformation = slice(startIndex + HASHHALF, endIndex)
-        asciiOutput = decryptText(TEMPKEY, asciiOutput[rawInformation])
+        key = passwordToKey("steganography", b'static_salt')
+        asciiOutput = decryptText(key, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
            decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
