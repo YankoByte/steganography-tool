@@ -10,6 +10,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from os import urandom
 import base64
+import re
 
 HASHSIZE = 64
 
@@ -269,16 +270,21 @@ def encodingSelection():
         encodingHeader += info
 
     elif encodingSelection == FILEINPUT:
-        encodingHeader += PLACEHOLDERHEADER
-
         print("\n★ Enter the full file path (including name and extension) ★")
-        newFilePath = input("Full File Directory: ")
-        if os.path.isfile(newFilePath) == False:
+        filePath = input("Full File Directory: ")
+        if os.path.isfile(filePath) == False:
             clearTerminal()
             print("❗ Error - File Does Not Exist! ❗\n")
-            encodingSelection
+            encodingSelection()
 
-        with open(newFilePath, "rb") as imageFile:
+        fileName = os.path.basename(filePath)
+        encodingHeader += "$"
+        encodingHeader += fileName
+        encodingHeader += "$"
+
+        print(f"DEBUG REMOVE LATER ENCODING HEADER {encodingHeader}")
+
+        with open(filePath, "rb") as imageFile:
             info = base64.b64encode(imageFile.read()).decode('utf-8')
             encodingHeader += info
     else:
@@ -296,3 +302,9 @@ def encodingErrorDisplay(totalBits, encodeLimit):
 
     clearTerminal()
     print("★ Returning to encoding information... ★\n")
+
+def extractName(text):
+    name = re.search(r'\$(.*?)\$', text)
+    if name:
+        return name.group(1)
+    return None

@@ -4,6 +4,7 @@ from PIL import Image
 from Helpers import *
 import os
 import math
+from pathlib import Path
 
 ENCODE = "1"
 DECODE = "2"
@@ -293,13 +294,32 @@ def decodeInformationFootprint(filePath):
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
            decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
-           print("\n★ Information Type: Text ★\n")
+           print("═══ INFORMATION METADATA ═══")
+           print("Information Format: Plaintext\n")
            print(f"Decoded Information: {decodedInformation}")
         else:
-            decodedInformation = asciiOutput[len(EXTHEADER + PLACEHOLDERHEADER):]
-            print("\n★ Information Type: Other ★\n")
+            decodedInformation = asciiOutput[len(EXTHEADER):]
+            extractedFile = extractName(decodedInformation)
+            file = Path(extractedFile)
+            extension = file.suffix.lstrip('.')
+
+            print("\n═══ INFORMATION METADATA ═══")
+            print(f"Information Format: {extension}")
+            print(f"Original Filename: {extractedFile}")
+
+            nameLength = len(extractedFile) + 2
+            decodedInformation = asciiOutput[len(EXTHEADER) + nameLength:]
             print(f"Decoded Information: {decodedInformation}")
-            outputPath = input("\n\nFull File Directory: ")
+
+            scriptDir = os.path.dirname(os.path.abspath(__file__))
+            outputName = scriptDir
+            outputName += "\\"
+            outputName += extractedFile
+
+            print(f"Default Output Name: {outputName}")
+
+            # print("\n★ Would you like to duplicate this file using the default output name?")
+            outputPath = input("\nOutput Name: ")
             writeToFile(decodedInformation.encode(), outputPath)
     else:
         print("\n❗ Error - no Information Could be Found ❗")
