@@ -35,12 +35,13 @@ ENTWARNING = 5
 HASHSIZE = 64
 HASHHALF = 32
 
-EXTHEADER = "EXT="
+EXTHEADER = "|EXT="
 DEFAULTHEADER = "Text "
 PLACEHOLDERHEADER = "!!!! "
 DEFAULTOFFSET = 9
 
 # Note to self, the plaintext is "steganography"
+DEFAULTPASS = "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
@@ -123,22 +124,22 @@ def encodingSettings(filePath):
 
 
 def encodingFingerprint(filePath):
-    hash = DEFAULTHASH
+    fingerprint = DEFAULTPASS
     fileName = os.path.basename(filePath)
 
     print(f'★ Do you want to use a custom fingerprint to identify "{fileName}"? ★')
     fingerprintChoice = input('Enter "yes" or "no": ').lower()
     if fingerprintChoice == CONFIRM or fingerprintChoice == CONFIRM2:
         fingerprint = input("Enter Fingerprint: ")
-
         if fingerprint == "":
-            hash = DEFAULTHASH
-        else:
-            hash = hashGenerator(fingerprint)
+            fingerprint = DEFAULTPASS
+
     elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
         clearTerminal()
         print("❗ Error - Please Type a Valid Option ❗\n")
         encodingFingerprint(filePath)
+
+    hash = hashGenerator(fingerprint)
 
     print(f"\n★ Fingerprint has been created: {hash} ★\n")
 
@@ -146,17 +147,17 @@ def encodingFingerprint(filePath):
     clearTerminal()
 
     print("★ Success — Proceeding to Encoding Settings... ★\n")
-    encodingInformation(filePath, hash)
+    encodingInformation(filePath, hash, fingerprint)
 
 
-def encodingInformation(filePath, hash):
+def encodingInformation(filePath, hash, fingerprint):
     if hash == DEFAULTHASH:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
         )
 
     encodingHeader = encodingSelection()
-    encodedData = dataEncoder(encodingHeader, hash)
+    encodedData = dataEncoder(encodingHeader, hash, fingerprint)
     totalBits = len(encodedData)
 
     im = Image.open(filePath)
@@ -288,8 +289,7 @@ def decodeInformationFootprint(filePath):
 
 
         rawInformation = slice(startIndex + HASHHALF, endIndex)
-        key = passwordToKey("steganography", b'static_salt')
-        asciiOutput = decryptText(key, asciiOutput[rawInformation])
+        asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
            decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
@@ -297,6 +297,7 @@ def decodeInformationFootprint(filePath):
            print(f"Decoded Information: {decodedInformation}")
         else:
             decodedInformation = asciiOutput[len(EXTHEADER + PLACEHOLDERHEADER):]
+            print("\n★ Information Type: Other ★\n")
             print(f"Decoded Information: {decodedInformation}")
             outputPath = input("\n\nFull File Directory: ")
             writeToFile(decodedInformation.encode(), outputPath)

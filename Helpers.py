@@ -26,7 +26,7 @@ BCHAN = 2
 
 TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
-EXTHEADER = "EXT="
+EXTHEADER = "|EXT="
 DEFAULTHEADER = "Text "
 PLACEHOLDERHEADER = "!!!! "
 
@@ -34,6 +34,7 @@ TEXTINPUT = "1"
 FILEINPUT = "2"
 
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
+DEFAULTSALT = b"TH1SH4SH1SN0T$IMPLE!!"
 
 
 
@@ -53,13 +54,13 @@ def hashGenerator(string):
     return hashlib.sha256(data).hexdigest()
 
 
-def dataEncoder(info, hash):
+def dataEncoder(info, hash, fingerprint):
     firstHalf = slice(HASHSIZE // 2)
     lastHalf = slice(HASHSIZE // 2, HASHSIZE)
 
     firstFingerprint = hash[firstHalf]
     lastFingerprint = hash[lastHalf]
-    key = passwordToKey("steganography", b'static_salt')
+    key = passwordToKey(fingerprint, DEFAULTSALT)
     encryptedData = encryptText(key, info)
 
     data = firstFingerprint + encryptedData + lastFingerprint
@@ -75,12 +76,13 @@ def encryptText(key, plainText):
     
     return base64.b64encode(iv + ciphertext).decode('utf-8')
 
-def decryptText(key, encryptedData) -> str:
+def decryptText(key, encryptedData):
     encrypted_data_bytes = base64.b64decode(encryptedData)
     
     iv = encrypted_data_bytes[:16]
     ciphertext = encrypted_data_bytes[16:]
     
+    key = passwordToKey(key, DEFAULTSALT)
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
     
