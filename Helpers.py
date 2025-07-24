@@ -305,3 +305,8 @@ def extractName(text):
     if name:
         return name.group(1)
     return None
+
+def displayExitMenu():
+    print("\nThank you for using Stego Tools v1.4. Goodbye!")
+    input("Press Enter to Continue...")
+    exit()

@@ -56,9 +56,7 @@ def mainMenu():
         clearTerminal()
         decodeMenu()
     elif mainMenuOption == QUITNUMBER:
-        print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input("Press Enter to Continue...")
-        exit()
+        displayExitMenu()
     else:
         clearTerminal()
         print("★ Choose either option 1 or option 2 to continue. ★\n")
@@ -211,9 +209,7 @@ def encodingInformation(filePath, hash, fingerprint):
     print('\n★ Press Enter to return to the menu, or type "quit" to exit. ★')
     menuSelection = input("Option Selected: ").lower()
     if menuSelection == QUITAPP:
-        print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input("Press Enter to Continue...")
-        exit()
+        displayExitMenu()
 
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
@@ -323,9 +319,7 @@ def decodeInformationFootprint(filePath):
     print('\n★ Press Enter to return to the menu, or type "quit" to exit. ★')
     menuSelection = input("Option Selected: ").lower()
     if menuSelection == QUITAPP:
-        print("\nThank you for using Stego Tools v1.4. Goodbye!")
-        input("Press Enter to Continue...")
-        exit()
+        displayExitMenu()
 
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
