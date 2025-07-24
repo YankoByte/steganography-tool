@@ -275,39 +275,34 @@ def decodeInformationFootprint(filePath):
             f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
         )
 
-        print("═══ ENCODED INFORMATION ═══")
-        print(f"Message Start Index: {startIndex + HASHHALF}")
-        print(f"Message End Index: {endIndex - 1}")
-        print(f"Message Length: {endIndex - startIndex - HASHHALF}")
-
+        # print("═══ ENCODED INFORMATION ═══")
+        # print(f"Message Start Index: {startIndex + HASHHALF}")
+        # print(f"Message End Index: {endIndex - 1}")
+        # print(f"Message Length: {endIndex - startIndex - HASHHALF}")
 
         rawInformation = slice(startIndex + HASHHALF, endIndex)
         asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
            decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
-           print("═══ INFORMATION METADATA ═══")
-           print("Information Format: Plaintext\n")
+
+           printDecodedInformation(TEXTINPUT, None)
            print(f"Decoded Information: {decodedInformation}")
         else:
             decodedInformation = asciiOutput[len(EXTHEADER):]
             extractedFile = extractName(decodedInformation)
             file = Path(extractedFile)
             extension = file.suffix.lstrip('.')
-
-            print("\n═══ INFORMATION METADATA ═══")
-            print(f"Information Format: {extension}")
-            print(f"Original Filename: {extractedFile}")
-
             nameLength = len(extractedFile) + 2
             decodedInformation = asciiOutput[len(EXTHEADER) + nameLength:]
-            print(f"Decoded Information: {decodedInformation}")
-
             scriptDir = os.path.dirname(os.path.abspath(__file__))
             outputName = scriptDir
             outputName += "\\"
             outputName += extractedFile
 
+            printDecodedInformation(TEXTINPUT, extension)
+            print(f"Original Filename: {extractedFile}")
+            print(f"Decoded Information: {decodedInformation}")
             print(f"Default Output Name: {outputName}")
 
             # print("\n★ Would you like to duplicate this file using the default output name?")

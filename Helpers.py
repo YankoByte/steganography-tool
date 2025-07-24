@@ -310,3 +310,10 @@ def displayExitMenu():
     print("\nThank you for using Stego Tools v1.4. Goodbye!")
     input("Press Enter to Continue...")
     exit()
+
+def printDecodedInformation(inputType, extension):
+    print("═══ INFORMATION METADATA ═══")
+    if inputType == TEXTINPUT:
+        print(f"Information Format: Plaintext")
+    else:
+        print(f"Information Format: {extension}")
