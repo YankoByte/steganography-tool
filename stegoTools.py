@@ -1,9 +1,9 @@
 # COMP6841 - Steganography Project
 
-from PIL import Image
-from Helpers import *
 import os
 import math
+from PIL import Image
+from Helpers import *
 from pathlib import Path
 
 ENCODE = "1"

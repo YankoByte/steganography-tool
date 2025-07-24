@@ -2,15 +2,15 @@
 
 import os
 import hashlib
-from PIL import Image
 import numpy as np
 import math
+import base64
+import re
+from PIL import Image
 from collections import Counter
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from os import urandom
-import base64
-import re
 
 HASHSIZE = 64
 
