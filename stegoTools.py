@@ -38,13 +38,9 @@ HASHHALF = 32
 
 EXTHEADER = "|EXT="
 DEFAULTHEADER = "Text "
-PLACEHOLDERHEADER = "!!!! "
-DEFAULTOFFSET = 9
 
-# Note to self, the plaintext is "steganography"
 DEFAULTPASS = "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
-TEMPKEY = b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10'
 
 print("★ Stego Tools v1.4 ★\n")
 
