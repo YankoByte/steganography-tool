@@ -6,6 +6,7 @@ import numpy as np
 import math
 import base64
 import re
+from blake3 import blake3
 from pathlib import Path
 from PIL import Image
 from collections import Counter
@@ -33,6 +34,7 @@ DEFAULTHEADER = "Text "
 TEXTINPUT = "1"
 FILEINPUT = "2"
 
+DEFAULTPASS = "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 DEFAULTSALT = b"TH1SH4SH1SN0T$IMPLE!!"
 
@@ -103,20 +105,26 @@ def writeToFile(decodedInformation, outputFilePath):
     with open(outputFilePath, 'wb') as f:
         f.write(binaryData)
 
-def extractLSBBits(filePath, totalBits):
+def extractLSBBits(filePath, totalBits, key = DEFAULTPASS):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
     im = Image.open(filePath).convert("RGB")
     pixels = im.load()
     width, height = im.size
+    encodeLimit = width * height * RGBCHANNELS
+
+    mapping = generateSecureSample(DEFAULTPASS, encodeLimit, totalBits)
 
     bits = []
-    for y in range(height):
-        for x in range(width):
-            r, g, b = pixels[x, y]
-            for channel in (r, g, b):
-                bits.append(str(channel & 1))
-                if len(bits) == totalBits:
-                    return "".join(bits)
+    for i in range(totalBits):
+        currentPixel = math.ceil(mapping[i] / 3)
+        currentChannel = mapping[i] % 3
+
+        x = currentPixel % width
+        y = math.floor(currentPixel / width)
+
+        pixel = pixels[x, y]
+        bits.append(str(pixel[currentChannel] & 1))
+
     return "".join(bits)
 
 
@@ -377,3 +385,19 @@ def fileSizeConversion(fileSize):
         fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE * BYTETOKILOBYTE
         fileSize = round(fileSize, 2)
         print(f"File Size: {fileSize} gB")
+
+def generateSecureSample(key, limit, count):
+    limit = limit - RGBCHANNELS
+    indices = list(range(limit))
+
+    hasher = blake3(key.encode())
+    random_bytes = hasher.digest(length=8 * limit)
+
+    for i in reversed(range(1, limit)):
+        start = (i * 8) % len(random_bytes)
+        val = int.from_bytes(random_bytes[start:start+8], 'big')
+
+        j = val % (i + 1)
+        indices[i], indices[j] = indices[j], indices[i]
+
+    return indices[:count]
