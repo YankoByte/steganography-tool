@@ -6,6 +6,7 @@ import numpy as np
 import math
 import base64
 import re
+from pathlib import Path
 from PIL import Image
 from collections import Counter
 from cryptography.hazmat.backends import default_backend
@@ -34,6 +35,10 @@ FILEINPUT = "2"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 DEFAULTSALT = b"TH1SH4SH1SN0T$IMPLE!!"
 
+NOFILE = 1
+INVALIDOPTION = 2
+NOINFORMATION = 3
+INVALIDMSG = 4
 
 
 def clearTerminal():
@@ -262,7 +267,7 @@ def encodingSelection():
         info = input("Enter text to encode: ")
         if info == "":
             clearTerminal()
-            print("⚠ Error - Please Provide a Valid Message to Encode. ⚠\n")
+            printError(INVALIDMSG)
             encodingSelection
         encodingHeader += info
 
@@ -271,7 +276,7 @@ def encodingSelection():
         filePath = input("Full File Directory: ")
         if os.path.isfile(filePath) == False:
             clearTerminal()
-            print("❗ Error - File Does Not Exist! ❗\n")
+            printError(NOFILE)
             encodingSelection()
 
         fileName = os.path.basename(filePath)
@@ -286,7 +291,7 @@ def encodingSelection():
             encodingHeader += info
     else:
         clearTerminal()
-        print("❗ Error - Please Type a Valid Option ❗\n")
+        printError(INVALIDOPTION)
         encodingSelection()
 
     return encodingHeader
@@ -307,13 +312,47 @@ def extractName(text):
     return None
 
 def displayExitMenu():
-    print("\nThank you for using Stego Tools v1.4. Goodbye!")
+    print("\nThank you for using Stego Tools, goodbye!")
     input("Press Enter to Continue...")
     exit()
 
-def printDecodedInformation(inputType, extension):
+def printDecodedInformation(inputType, asciiOutput):
     print("═══ INFORMATION METADATA ═══")
     if inputType == TEXTINPUT:
+        decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
         print(f"Information Format: Plaintext")
+        print(f"Decoded Information: {decodedInformation}")
     else:
+        decodedInformation = asciiOutput[len(EXTHEADER):]
+        extractedFile = extractName(decodedInformation)
+        nameLength = len(extractedFile) + 2
+        decodedInformation = asciiOutput[len(EXTHEADER) + nameLength:]
+
+        file = Path(extractedFile)
+        extension = file.suffix.lstrip('.')
+        scriptDir = os.path.dirname(os.path.abspath(__file__))
+        outputName = scriptDir
+        outputName += "\\"
+        outputName += extractedFile
+        
         print(f"Information Format: {extension}")
+        print(f"Original Filename: {extractedFile}")
+        print(f"Decoded Information: {decodedInformation}")
+        print(f"Default Output Name: {outputName}")
+
+        print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
+        outputPath = input("Output Name: ")
+        if outputPath == "":
+            outputPath = outputName
+
+        writeToFile(decodedInformation.encode(), outputPath)
+
+def printError(errorType):
+    if errorType == NOFILE:
+        print("❗ Error - File Does Not Exist! ❗\n")
+    elif errorType == INVALIDOPTION:
+        print("❗ Error - Please Type a Valid Option ❗\n")
+    elif errorType == NOINFORMATION:
+        print("\n❗ Error - no Information Could be Found ❗")
+    elif errorType == INVALIDMSG:
+        print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")

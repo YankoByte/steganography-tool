@@ -42,7 +42,12 @@ DEFAULTHEADER = "Text "
 DEFAULTPASS = "steganography"
 DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 
-print("★ Stego Tools v1.4 ★\n")
+NOFILE = 1
+INVALIDOPTION = 2
+NOINFORMATION = 3
+INVALIDMSG = 4
+
+print("★ Stego Tools ★\n")
 
 
 def mainMenu():
@@ -78,7 +83,7 @@ def encodeMenu():
         encodingSettings(encodeSelection)
     else:
         clearTerminal()
-        print("❗ Error - File Does Not Exist! ❗\n")
+        printError(NOFILE)
         encodeMenu()
 
 
@@ -114,7 +119,7 @@ def encodingSettings(filePath):
         encodeMenu()
     else:
         clearTerminal()
-        print("❗ Error - Please Type a Valid Option ❗\n")
+        printError(INVALIDOPTION)
         encodingSettings(filePath)
 
 
@@ -131,7 +136,7 @@ def encodingFingerprint(filePath):
 
     elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
         clearTerminal()
-        print("❗ Error - Please Type a Valid Option ❗\n")
+        printError(INVALIDOPTION)
         encodingFingerprint(filePath)
 
     hash = hashGenerator(fingerprint)
@@ -180,7 +185,7 @@ def encodingInformation(filePath, hash, fingerprint):
         encodeMenu()
     elif confirmation != CONFIRM and confirmation != CONFIRM2:
         clearTerminal()
-        print("❗ Error - Please Type a Valid Option ❗\n")
+        printError(INVALIDOPTION)
         encodingInformation(filePath, hash)
 
     img = im.load()
@@ -232,7 +237,7 @@ def decodeMenu():
 
     else:
         clearTerminal()
-        print("❗ Error - File Does Not Exist! ❗\n")
+        printError(NOFILE)
         decodeMenu()
 
     input("Press Enter to exit...")
@@ -262,10 +267,7 @@ def decodeInformationFootprint(filePath):
     totalBits = width * height * RGBCHANNELS
 
     lsbString = extractLSBBits(filePath, totalBits)
-
-
     asciiOutput = bitsToAscii(lsbString)
-    # print(f"\nASCII Output:\n{asciiOutput}")
 
     if firstFingerprint in asciiOutput and lastFingerprint in asciiOutput:
         startIndex = asciiOutput.find(firstFingerprint)
@@ -275,41 +277,16 @@ def decodeInformationFootprint(filePath):
             f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
         )
 
-        # print("═══ ENCODED INFORMATION ═══")
-        # print(f"Message Start Index: {startIndex + HASHHALF}")
-        # print(f"Message End Index: {endIndex - 1}")
-        # print(f"Message Length: {endIndex - startIndex - HASHHALF}")
-
         rawInformation = slice(startIndex + HASHHALF, endIndex)
         asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
         
         if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
-           decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
-
-           printDecodedInformation(TEXTINPUT, None)
-           print(f"Decoded Information: {decodedInformation}")
+           printDecodedInformation(TEXTINPUT, asciiOutput)
         else:
-            decodedInformation = asciiOutput[len(EXTHEADER):]
-            extractedFile = extractName(decodedInformation)
-            file = Path(extractedFile)
-            extension = file.suffix.lstrip('.')
-            nameLength = len(extractedFile) + 2
-            decodedInformation = asciiOutput[len(EXTHEADER) + nameLength:]
-            scriptDir = os.path.dirname(os.path.abspath(__file__))
-            outputName = scriptDir
-            outputName += "\\"
-            outputName += extractedFile
+            printDecodedInformation(FILEINPUT, asciiOutput)
 
-            printDecodedInformation(TEXTINPUT, extension)
-            print(f"Original Filename: {extractedFile}")
-            print(f"Decoded Information: {decodedInformation}")
-            print(f"Default Output Name: {outputName}")
-
-            # print("\n★ Would you like to duplicate this file using the default output name?")
-            outputPath = input("\nOutput Name: ")
-            writeToFile(decodedInformation.encode(), outputPath)
     else:
-        print("\n❗ Error - no Information Could be Found ❗")
+        printError(NOINFORMATION)
 
     print('\n★ Press Enter to return to the menu, or type "quit" to exit. ★')
     menuSelection = input("Option Selected: ").lower()
