@@ -17,6 +17,7 @@ HASHSIZE = 64
 
 RGBCHANNELS = 3
 BYTETOKILOBYTE = 1 / 1000
+KILOBYTETOBYTE = 1000
 BITTOBYTE = 1 / 8
 
 VARWARNING = 500
@@ -197,7 +198,7 @@ def printFileStats(filePath, fileName, fileSize, extension):
     print("═══ FILE STATS ═══")
     print(f"Full File Directory: {filePath}")
     print(f"File Name: {fileName}")
-    print(f"File Size: {fileSize} kB")
+    fileSizeConversion(fileSize)
     print(f"File Extension: {extension}\n")
 
 
@@ -205,6 +206,7 @@ def printImageStats(filePath):
     im = Image.open(filePath)
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
+    encodeLimit = round(encodeLimit, 2)
 
     print("═══ IMAGE STATS ═══")
     print(f"Dimensions: {width}px x {height}px")
@@ -356,3 +358,22 @@ def printError(errorType):
         print("\n❗ Error - no Information Could be Found ❗")
     elif errorType == INVALIDMSG:
         print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")
+
+def fileSizeConversion(fileSize):
+    fileSize = fileSize * KILOBYTETOBYTE
+    power = math.log(fileSize, KILOBYTETOBYTE)
+
+    if power < 1:
+        print(f"File Size: {fileSize} B")
+    elif power < 2:
+        fileSize = fileSize * BYTETOKILOBYTE
+        fileSize = round(fileSize, 2)
+        print(f"File Size: {fileSize} kB")
+    elif power < 3:
+        fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE
+        fileSize = round(fileSize, 2)
+        print(f"File Size: {fileSize} mB")
+    else:
+        fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE * BYTETOKILOBYTE
+        fileSize = round(fileSize, 2)
+        print(f"File Size: {fileSize} gB")
