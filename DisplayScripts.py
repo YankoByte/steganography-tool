@@ -24,16 +24,19 @@ INVALIDMSG = 3
 FILESIZE = 0
 ENCODABLEINFO = 1
 
+
 def clearTerminal():
     if os.name == "nt":
         os.system("cls")
     else:
         os.system("clear")
 
+
 def displayExitMenu():
     print("\nThank you for using Stego Tools, goodbye!")
     input("Press Enter to Continue...")
     exit()
+
 
 def printError(errorType):
     if errorType == NOFILE:
@@ -45,6 +48,7 @@ def printError(errorType):
     elif errorType == INVALIDMSG:
         print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")
 
+
 def printMainMenu():
     print("╔══════ MAIN MENU ═════╗")
     print("║ Options              ║")
@@ -52,6 +56,7 @@ def printMainMenu():
     print("║ 2. Decoding Suite    ║")
     print("║ 3. Quit App          ║")
     print("╚══════════════════════╝")
+
 
 def printEncodingMenu():
     print("╔════════════════════════ ENCODING MENU ════════════════════════╗")
@@ -72,6 +77,7 @@ def printDecodeMenu():
     print('║ ★ To return to the main menu, type "return".                  ║')
     print("╚═══════════════════════════════════════════════════════════════╝")
 
+
 def printEncodingSelections():
     print("╔═══════════════════════ DATA INPUT MODE ═════════════════════════╗")
     print("║ Options                                                         ║")
@@ -80,6 +86,7 @@ def printEncodingSelections():
     print("║                                                                 ║")
     print("╚═════════════════════════════════════════════════════════════════╝")
 
+
 def fileSizeConversion(fileSize, displayInfo):
     startingText = None
 
@@ -87,7 +94,6 @@ def fileSizeConversion(fileSize, displayInfo):
         startingText = "File Size:"
     else:
         startingText = "Encodable Information:"
-
 
     fileSize = fileSize * KILOBYTETOBYTE
     power = math.log(fileSize, KILOBYTETOBYTE)
@@ -107,6 +113,7 @@ def fileSizeConversion(fileSize, displayInfo):
         fileSize = round(fileSize, 2)
         print(f"{startingText} {fileSize} gB")
 
+
 def encodingErrorDisplay(totalBits, encodeLimit):
     print("\n⚠ WARNING: The data you're trying to encode exceeds the image's capacity")
     print(f"  ★ Required bits: {totalBits}")
@@ -115,6 +122,7 @@ def encodingErrorDisplay(totalBits, encodeLimit):
 
     clearTerminal()
     print("★ Returning to encoding information... ★\n")
+
 
 def printEncodingSettings(numBits, numPixels, hash):
     print("\n═══ ENCODING SETTINGS ═══")
@@ -139,6 +147,7 @@ def printImageStats(filePath):
     print("═══ IMAGE STATS ═══")
     print(f"Dimensions: {width}px x {height}px")
     fileSizeConversion(encodeLimit, ENCODABLEINFO)
+
 
 def printStegHeuristics(filePath):
     totalVariance = calcTotalVariance(filePath)
@@ -174,9 +183,11 @@ def calcTotalVariance(filePath):
     pixels = np.array(img)
     return round(np.var(pixels), 2)
 
+
 def calcTotalEntropy(filePath):
     img = Image.open(filePath).convert("L")
     return round(img.entropy(), 2)
+
 
 def calcChannelVariance(filePath, channel):
     img = Image.open(filePath).convert("RGB")
