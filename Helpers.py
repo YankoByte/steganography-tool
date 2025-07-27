@@ -30,27 +30,13 @@ INVALIDOPTION = 1
 NOINFORMATION = 2
 INVALIDMSG = 3
 
-
-def stringToBinary(string):
-    return "".join(format(ord(char), "08b") for char in string)
-
-
 def hashGenerator(string):
     data = string.encode()
     return hashlib.sha256(data).hexdigest()
 
-
-def dataEncoder(info, hash, fingerprint):
-    firstHalf = slice(HASHSIZE // 2)
-    lastHalf = slice(HASHSIZE // 2, HASHSIZE)
-
-    firstFingerprint = hash[firstHalf]
-    lastFingerprint = hash[lastHalf]
-    key = passwordToKey(fingerprint, DEFAULTSALT)
-    encryptedData = encryptText(key, info)
-
-    data = firstFingerprint + encryptedData + lastFingerprint
-    return stringToBinary(data)
+def passwordToKey(password, salt):
+    key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000, dklen=16)
+    return key
 
 def encryptText(key, plainText):
     iv = urandom(16)
@@ -76,14 +62,38 @@ def decryptText(key, encryptedData):
     
     return decrypted_data.decode('utf-8')
 
-def passwordToKey(password, salt):
-    key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000, dklen=16)
-    return key
+def generateSecureSample(key, limit, count):
+    limit = limit - RGBCHANNELS
+    indices = list(range(limit))
 
-def writeToFile(decodedInformation, outputFilePath):
-    binaryData = base64.b64decode(decodedInformation)
-    with open(outputFilePath, 'wb') as f:
-        f.write(binaryData)
+    hasher = blake3(key.encode())
+    random_bytes = hasher.digest(length=8 * limit)
+
+    for i in reversed(range(1, limit)):
+        start = (i * 8) % len(random_bytes)
+        val = int.from_bytes(random_bytes[start:start+8], 'big')
+
+        j = val % (i + 1)
+        indices[i], indices[j] = indices[j], indices[i]
+
+    return indices[:count]
+
+
+def stringToBinary(string):
+    return "".join(format(ord(char), "08b") for char in string)
+
+
+def dataEncoder(info, hash, fingerprint):
+    firstHalf = slice(HASHSIZE // 2)
+    lastHalf = slice(HASHSIZE // 2, HASHSIZE)
+
+    firstFingerprint = hash[firstHalf]
+    lastFingerprint = hash[lastHalf]
+    key = passwordToKey(fingerprint, DEFAULTSALT)
+    encryptedData = encryptText(key, info)
+
+    data = firstFingerprint + encryptedData + lastFingerprint
+    return stringToBinary(data)
 
 def extractLSBBits(filePath, totalBits, key):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
@@ -116,6 +126,12 @@ def bitsToAscii(bitString):
         ascii_char = chr(int(byte, 2))
         chars.append(ascii_char)
     return "".join(chars)
+
+
+def writeToFile(decodedInformation, outputFilePath):
+    binaryData = base64.b64decode(decodedInformation)
+    with open(outputFilePath, 'wb') as f:
+        f.write(binaryData)
 
 
 def encodingSelection():
@@ -158,12 +174,6 @@ def encodingSelection():
 
     return encodingHeader
 
-def extractName(text):
-    name = re.search(r'\$(.*?)\$', text)
-    if name:
-        return name.group(1)
-    return None
-
 def printDecodedInformation(inputType, asciiOutput):
     print("═══ INFORMATION METADATA ═══")
     if inputType == TEXTINPUT:
@@ -195,18 +205,8 @@ def printDecodedInformation(inputType, asciiOutput):
 
         writeToFile(decodedInformation.encode(), outputPath)
 
-def generateSecureSample(key, limit, count):
-    limit = limit - RGBCHANNELS
-    indices = list(range(limit))
-
-    hasher = blake3(key.encode())
-    random_bytes = hasher.digest(length=8 * limit)
-
-    for i in reversed(range(1, limit)):
-        start = (i * 8) % len(random_bytes)
-        val = int.from_bytes(random_bytes[start:start+8], 'big')
-
-        j = val % (i + 1)
-        indices[i], indices[j] = indices[j], indices[i]
-
-    return indices[:count]
+def extractName(text):
+    name = re.search(r'\$(.*?)\$', text)
+    if name:
+        return name.group(1)
+    return None
