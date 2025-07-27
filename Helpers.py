@@ -34,16 +34,22 @@ INVALIDMSG = 3
 
 
 def hashGenerator(string):
+    # Given a string, returns a SHA256 from the input
+
     data = string.encode()
     return hashlib.sha256(data).hexdigest()
 
 
 def passwordToKey(password, salt):
+    # Given a cleartext password, creates a 16 byte key
+
     key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100000, dklen=16)
     return key
 
 
 def encryptText(key, plainText):
+    # Given a plaintext and a key, encrypts text using AES encryption
+
     iv = urandom(16)
 
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
@@ -55,6 +61,8 @@ def encryptText(key, plainText):
 
 
 def decryptText(key, encryptedData):
+    # Given a ciphertext and a key, decrypts text using AES encryption
+
     encrypted_data_bytes = base64.b64decode(encryptedData)
 
     iv = encrypted_data_bytes[:16]
@@ -70,12 +78,16 @@ def decryptText(key, encryptedData):
 
 
 def generateSecureSample(key, limit, count):
+    # Given a key, creates a random uniformly distrubuted permutation of
+    # 'count' numbers with a maximum number of 'limit'
+
     limit = limit - RGBCHANNELS
     indices = list(range(limit))
 
     hasher = blake3(key.encode())
     random_bytes = hasher.digest(length=8 * limit)
 
+    # Fisher-Yates shuffle to generate deterministically random permutation
     for i in reversed(range(1, limit)):
         start = (i * 8) % len(random_bytes)
         val = int.from_bytes(random_bytes[start : start + 8], "big")
@@ -87,10 +99,15 @@ def generateSecureSample(key, limit, count):
 
 
 def stringToBinary(string):
+    # Given a string, converts it to binary
+
     return "".join(format(ord(char), "08b") for char in string)
 
 
 def dataEncoder(info, hash, fingerprint):
+    # Given info encoded as a base64 string, a hash and a fingerprint
+    # combines the data into a structured message and then encrypting it
+
     firstHalf = slice(HASHSIZE // 2)
     lastHalf = slice(HASHSIZE // 2, HASHSIZE)
 
@@ -104,12 +121,15 @@ def dataEncoder(info, hash, fingerprint):
 
 
 def extractLSBBits(filePath, totalBits, key):
-    """Return a string of the first n_bits LSBs from the image’s RGB channels."""
+    # Given a filePath, totalBits and a key, attempts to decode embedded
+    # information via LSB bit mask and extracting
+
     im = Image.open(filePath).convert("RGB")
     pixels = im.load()
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS
 
+    # Deterministically random permutation to embed bits in
     mapping = generateSecureSample(key, encodeLimit, totalBits)
 
     bits = []
@@ -127,7 +147,8 @@ def extractLSBBits(filePath, totalBits, key):
 
 
 def bitsToAscii(bitString):
-    """Convert a binary string to its ASCII representation (truncates to full bytes)."""
+    # Given the binary data bitString, converts bits into ascii characters
+
     chars = []
     for i in range(0, len(bitString) - 7, 8):
         byte = bitString[i : i + 8]
@@ -137,12 +158,18 @@ def bitsToAscii(bitString):
 
 
 def writeToFile(decodedInformation, outputFilePath):
+    # Given decodedInformation and an outputFilePath, saves decoded information
+    # into a provided file.
+
     binaryData = base64.b64decode(decodedInformation)
     with open(outputFilePath, "wb") as f:
         f.write(binaryData)
 
 
 def encodingSelection():
+    # Helper function for encodingInformation() to help handle encoding file
+    # and text inputs
+
     encodingHeader = EXTHEADER
 
     printEncodingSelections()
@@ -184,6 +211,9 @@ def encodingSelection():
 
 
 def printDecodedInformation(inputType, asciiOutput):
+    # Given an inputType and asciiOutput, attempts to decode the embedded 
+    # information along with the metadata stored
+
     print("═══ INFORMATION METADATA ═══")
     if inputType == TEXTINPUT:
         decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER) :]
@@ -216,6 +246,9 @@ def printDecodedInformation(inputType, asciiOutput):
 
 
 def extractName(text):
+    # Given text, finds the first substring between two dollar signs ($), and
+    # returns it, in this case the name metadata is stored
+
     name = re.search(r"\$(.*?)\$", text)
     if name:
         return name.group(1)
