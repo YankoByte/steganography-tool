@@ -56,14 +56,14 @@ def mainMenu():
 
     printMainMenu()
 
-    mainMenuOption = input("Option Selected: ")
-    if mainMenuOption == ENCODE:
+    menuOption = input("Option Selected: ")
+    if menuOption == ENCODE:
         clearTerminal()
         encodeMenu()
-    elif mainMenuOption == DECODE:
+    elif menuOption == DECODE:
         clearTerminal()
         decodeMenu()
-    elif mainMenuOption == QUITNUMBER:
+    elif menuOption == QUITNUMBER:
         displayExitMenu()
     else:
         clearTerminal()
@@ -85,16 +85,16 @@ def encodeMenu():
 
     printEncodingMenu()
 
-    encodeSelection = input("Option Selected: ")
-    if encodeSelection.lower() == RETURNMAIN:
+    encodeOption = input("Option Selected: ")
+    if encodeOption.lower() == RETURNMAIN:
         clearTerminal()
         print("★ Returning to Main Menu... ★\n")
         mainMenu()
 
-    if os.path.isfile(encodeSelection):
+    if os.path.isfile(encodeOption):
         clearTerminal()
         print("★ Success - Provided File Exists! ★\n")
-        encodingSettings(encodeSelection)
+        encodingSettings(encodeOption)
     else:
         clearTerminal()
         printError(NOFILE)
@@ -132,13 +132,13 @@ def encodingSettings(filePath):
     printStegHeuristics(filePath)
 
     print("\n★ Do you want to embed data in this image? ★")
-    encodingConfirmation = input('Enter "yes" or "no": ').lower()
+    confirmation = input('Enter "yes" or "no": ').lower()
 
-    if encodingConfirmation == CONFIRM or encodingConfirmation == CONFIRM2:
+    if confirmation == CONFIRM or confirmation == CONFIRM2:
         clearTerminal()
         print("★ Success — Proceeding to Fingerprinting Settings... ★\n")
         encodingFingerprint(filePath)
-    elif encodingConfirmation == DENY or encodingConfirmation == DENY2:
+    elif confirmation == DENY or confirmation == DENY2:
         clearTerminal()
         print("★ Returning to encoding menu... ★\n")
         encodeMenu()
@@ -164,13 +164,13 @@ def encodingFingerprint(filePath):
     fileName = os.path.basename(filePath)
 
     print(f'★ Do you want to use a custom fingerprint to identify "{fileName}"? ★')
-    fingerprintChoice = input('Enter "yes" or "no": ').lower()
-    if fingerprintChoice == CONFIRM or fingerprintChoice == CONFIRM2:
+    customOption = input('Enter "yes" or "no": ').lower()
+    if customOption == CONFIRM or customOption == CONFIRM2:
         fingerprint = input("Enter Fingerprint: ")
         if fingerprint == "":
             fingerprint = DEFAULTPASS
 
-    elif fingerprintChoice != DENY and fingerprintChoice != DENY2:
+    elif customOption != DENY and customOption != DENY2:
         clearTerminal()
         printError(INVALIDOPTION)
         encodingFingerprint(filePath)
@@ -186,7 +186,7 @@ def encodingFingerprint(filePath):
     encodingInformation(filePath, hash, fingerprint)
 
 
-def encodingInformation(filePath, hash, fingerprint):
+def encodingInformation(filePath, hash, key):
     """
     Encodes, encrypts and embeds encoded data into the provided image using
     LSB steganography techniques. On top of this, a deterministic RNG algorithm
@@ -195,22 +195,22 @@ def encodingInformation(filePath, hash, fingerprint):
     Params:
         filePath (str): The path to the image file selected for encoding.
         hash (str): The SHA-256 hash created by the fingerprint.
-        fingerprint (str): A string provided by the user to embed data.
+        key (str): A key provided by the user to embed and encrypt data.
 
     Returns:
         None
     """
 
-    if fingerprint == DEFAULTPASS:
+    if key == DEFAULTPASS:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
         )
 
     encodingHeader = encodingSelection()
     if encodingHeader == None:
-        encodingInformation(filePath, hash, fingerprint)
+        encodingInformation(filePath, hash, key)
 
-    encodedData = dataEncoder(encodingHeader, hash, fingerprint)
+    encodedData = dataEncoder(encodingHeader, hash, key)
     totalBits = len(encodedData)
 
     im = Image.open(filePath)
@@ -243,7 +243,7 @@ def encodingInformation(filePath, hash, fingerprint):
 
     img = im.load()
 
-    mapping = generateSecureSample(fingerprint, encodeLimit, totalBits)
+    mapping = generateSecureSample(key, encodeLimit, totalBits)
 
     for i in range(totalBits):
         currentPixel = math.ceil(mapping[i] / 3)
@@ -253,7 +253,6 @@ def encodingInformation(filePath, hash, fingerprint):
 
         pixel = list(img[xCoords, yCoords])
         pixel[currentChannel] = (pixel[currentChannel] & ~1) | int(encodedData[i])
-        # print(f"{i} - bit {mapping[i]} | pixel {currentPixel} [{xCoords}, {yCoords}] | channel [{currentChannel} - Val: {pixel[currentChannel] & 1}]")
         img[xCoords, yCoords] = tuple(pixel)
 
     im.save(outputName)
@@ -320,14 +319,14 @@ def decodeInformationFootprint(filePath):
     print(
         "★ Please enter your fingerprint. If left blank, the default fingerprint 'steganography' will be used. ★\n"
     )
-    hashPlainText = input("Please input your footprint: ")
-    if hashPlainText == "":
-        hashPlainText = DEFAULTPASS
+    key = input("Please input your footprint: ")
+    if key == "":
+        key = DEFAULTPASS
 
     clearTerminal()
-    print(f'★ Decoding data using fingerprint, "{hashPlainText}" ★')
+    print(f'★ Decoding data using fingerprint, "{key}" ★')
 
-    hash = hashGenerator(hashPlainText)
+    hash = hashGenerator(key)
     firstHalf = slice(HASHHALF)
     lastHalf = slice(HASHHALF, HASHSIZE)
     firstFingerprint = hash[firstHalf]
@@ -337,11 +336,11 @@ def decodeInformationFootprint(filePath):
     width, height = im.size
     totalBits = width * height * RGBCHANNELS
 
-    lsbString = extractLSBBits(filePath, HASHHALF * BYTETOBIT, hashPlainText)
+    lsbString = extractLSBBits(filePath, HASHHALF * BYTETOBIT, key)
     asciiOutput = bitsToAscii(lsbString)
 
     if firstFingerprint in asciiOutput:
-        lsbString = extractLSBBits(filePath, totalBits - RGBCHANNELS, hashPlainText)
+        lsbString = extractLSBBits(filePath, totalBits - RGBCHANNELS, key)
         asciiOutput = bitsToAscii(lsbString)
 
         if lastFingerprint in asciiOutput:
@@ -349,11 +348,11 @@ def decodeInformationFootprint(filePath):
             endIndex = asciiOutput.find(lastFingerprint)
 
             print(
-                f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
+                f"\n★ Verification Successful — the Fingerprint '{key}' is Correct. \n"
             )
 
             rawInformation = slice(startIndex + HASHHALF, endIndex)
-            asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
+            asciiOutput = decryptText(key, asciiOutput[rawInformation])
 
             if (EXTHEADER + TEXTHEADER) in asciiOutput:
                 printDecodedInformation(TEXTINPUT, asciiOutput)
