@@ -280,7 +280,8 @@ def encodingSelection():
         if info == "":
             clearTerminal()
             printError(INVALIDMSG)
-            encodingSelection
+            return None
+        
         encodingHeader += info
 
     elif encodingSelection == FILEINPUT:
@@ -289,14 +290,12 @@ def encodingSelection():
         if os.path.isfile(filePath) == False:
             clearTerminal()
             printError(NOFILE)
-            encodingSelection()
+            return None
 
         fileName = os.path.basename(filePath)
         encodingHeader += "$"
         encodingHeader += fileName
         encodingHeader += "$"
-
-        print(f"DEBUG REMOVE LATER ENCODING HEADER {encodingHeader}")
 
         with open(filePath, "rb") as imageFile:
             info = base64.b64encode(imageFile.read()).decode('utf-8')
@@ -304,7 +303,7 @@ def encodingSelection():
     else:
         clearTerminal()
         printError(INVALIDOPTION)
-        encodingSelection()
+        return None
 
     return encodingHeader
 

@@ -39,7 +39,6 @@ EXTHEADER = "|EXT="
 DEFAULTHEADER = "Text "
 
 DEFAULTPASS = "steganography"
-DEFAULTHASH = "bfabba369a999a083b44f26c2da7bc52846cf39a872816d06969d2837840de6b"
 
 NOFILE = 1
 INVALIDOPTION = 2
@@ -150,12 +149,15 @@ def encodingFingerprint(filePath):
 
 
 def encodingInformation(filePath, hash, fingerprint):
-    if hash == DEFAULTHASH:
+    if fingerprint == DEFAULTPASS:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
         )
 
     encodingHeader = encodingSelection()
+    if encodingHeader == None:
+        encodingInformation(filePath, hash, fingerprint)
+
     encodedData = dataEncoder(encodingHeader, hash, fingerprint)
     totalBits = len(encodedData)
 
