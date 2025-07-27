@@ -1,3 +1,5 @@
+# COMP6841 - Steganography Display Scripts File
+
 import math
 import os
 from collections import Counter
