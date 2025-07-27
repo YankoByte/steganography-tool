@@ -213,7 +213,7 @@ def encodingSelection():
 
 
 def printDecodedInformation(inputType, asciiOutput):
-    # Given an inputType and asciiOutput, attempts to decode the embedded 
+    # Given an inputType and asciiOutput, attempts to decode the embedded
     # information along with the metadata stored
 
     print("═══ INFORMATION METADATA ═══")
@@ -255,6 +255,7 @@ def extractName(text):
     if name:
         return name.group(1)
     return None
+
 
 def preserveMetadata(sourceFile, destinationFile):
     # Given a path to files, sourceFile and destinationFile
