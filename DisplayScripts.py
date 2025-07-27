@@ -82,7 +82,7 @@ def printEncodingSettings(numBits, numPixels, hash):
     print(f"Fingerprint Used: {hash}")
 
 def printEncodingSelections():
-    print("╔════════════════════ DATA INPUT MODE (WiP) ══════════════════════╗")
+    print("╔═══════════════════════ DATA INPUT MODE ═════════════════════════╗")
     print("║ Options                                                         ║")
     print("║ ★ Type '1' to manually enter plain text to encode.              ║")
     print("║ ★ Type '2' to load raw binary data from a file (any format).    ║")
@@ -118,7 +118,7 @@ def printStegHeuristics(filePath):
         )
 
 def printEncodingMenu():
-    print("╔═════════════════════ ENCODING MENU (WiP) ═════════════════════╗")
+    print("╔════════════════════════ ENCODING MENU ════════════════════════╗")
     print("║ Options                                                       ║")
     print("║ ★ Enter the full file path (including name and extension)     ║")
     print("║    to select an image for encoding.                           ║")
@@ -137,7 +137,7 @@ def printMainMenu():
 
 
 def printDecodeMenu():
-    print("╔═════════════════════ DECODING MENU (WiP) ═════════════════════╗")
+    print("╔════════════════════════ DECODING MENU ════════════════════════╗")
     print("║ Options                                                       ║")
     print("║ ★ Enter the full file path (including name and extension)     ║")
     print("║    to select an image for decoding.                           ║")
