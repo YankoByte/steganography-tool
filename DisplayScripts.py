@@ -72,6 +72,14 @@ def printDecodeMenu():
     print('║ ★ To return to the main menu, type "return".                  ║')
     print("╚═══════════════════════════════════════════════════════════════╝")
 
+def printEncodingSelections():
+    print("╔═══════════════════════ DATA INPUT MODE ═════════════════════════╗")
+    print("║ Options                                                         ║")
+    print("║ ★ Type '1' to manually enter plain text to encode.              ║")
+    print("║ ★ Type '2' to load raw binary data from a file (any format).    ║")
+    print("║                                                                 ║")
+    print("╚═════════════════════════════════════════════════════════════════╝")
+
 def fileSizeConversion(fileSize, displayInfo):
     startingText = None
 
@@ -114,13 +122,23 @@ def printEncodingSettings(numBits, numPixels, hash):
     print(f"Pixels Used: {numPixels}")
     print(f"Fingerprint Used: {hash}")
 
-def printEncodingSelections():
-    print("╔═══════════════════════ DATA INPUT MODE ═════════════════════════╗")
-    print("║ Options                                                         ║")
-    print("║ ★ Type '1' to manually enter plain text to encode.              ║")
-    print("║ ★ Type '2' to load raw binary data from a file (any format).    ║")
-    print("║                                                                 ║")
-    print("╚═════════════════════════════════════════════════════════════════╝")
+
+def printFileStats(filePath, fileName, fileSize, extension):
+    print("═══ FILE STATS ═══")
+    print(f"Full File Directory: {filePath}")
+    print(f"File Name: {fileName}")
+    fileSizeConversion(fileSize, FILESIZE)
+    print(f"File Extension: {extension}\n")
+
+
+def printImageStats(filePath):
+    im = Image.open(filePath)
+    width, height = im.size
+    encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
+
+    print("═══ IMAGE STATS ═══")
+    print(f"Dimensions: {width}px x {height}px")
+    fileSizeConversion(encodeLimit, ENCODABLEINFO)
 
 def printStegHeuristics(filePath):
     totalVariance = calcTotalVariance(filePath)
@@ -151,27 +169,14 @@ def printStegHeuristics(filePath):
         )
 
 
-def printFileStats(filePath, fileName, fileSize, extension):
-    print("═══ FILE STATS ═══")
-    print(f"Full File Directory: {filePath}")
-    print(f"File Name: {fileName}")
-    fileSizeConversion(fileSize, FILESIZE)
-    print(f"File Extension: {extension}\n")
-
-
-def printImageStats(filePath):
-    im = Image.open(filePath)
-    width, height = im.size
-    encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
-
-    print("═══ IMAGE STATS ═══")
-    print(f"Dimensions: {width}px x {height}px")
-    fileSizeConversion(encodeLimit, ENCODABLEINFO)
-
 def calcTotalVariance(filePath):
     img = Image.open(filePath).convert("RGB")
     pixels = np.array(img)
     return round(np.var(pixels), 2)
+
+def calcTotalEntropy(filePath):
+    img = Image.open(filePath).convert("L")
+    return round(img.entropy(), 2)
 
 def calcChannelVariance(filePath, channel):
     img = Image.open(filePath).convert("RGB")
@@ -179,11 +184,6 @@ def calcChannelVariance(filePath, channel):
 
     channelData = data[:, :, channel].flatten()
     return round(np.var(channelData), 2)
-
-
-def calcTotalEntropy(filePath):
-    img = Image.open(filePath).convert("L")
-    return round(img.entropy(), 2)
 
 
 def calcChannelEntropy(filePath, channel):
