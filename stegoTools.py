@@ -41,7 +41,18 @@ INVALIDMSG = 3
 print("★ Stego Tools ★\n")
 
 
+
 def mainMenu():
+    """
+    Display the main menu and handle the user's selection.
+
+    Params:
+        None
+
+    Returns:
+        None
+    """
+    
     printMainMenu()
 
     mainMenuOption = input("Option Selected: ")
@@ -55,11 +66,22 @@ def mainMenu():
         displayExitMenu()
     else:
         clearTerminal()
-        print("★ Choose either option 1 or option 2 to continue. ★\n")
+        print("★ PLease type  1, 2 or 3 to continue. ★\n")
         mainMenu()
 
 
 def encodeMenu():
+    """
+    Prompts the user to enter a file to encode information into as well
+    as handling user inputs.
+
+    Params:
+        None
+
+    Returns:
+        None
+    """
+
     printEncodingMenu()
 
     encodeSelection = input("Option Selected: ")
@@ -79,6 +101,17 @@ def encodeMenu():
 
 
 def encodingSettings(filePath):
+    """
+    Analyze a given file and providing user with steganalysis information and
+    prompts user regarding encoding options.
+
+    Params:
+        filePath (str): The path to the image file selected for encoding.
+
+    Returns:
+        None
+    """
+
     fileSize = os.path.getsize(filePath) * BYTETOKILOBYTE
     fileName = os.path.basename(filePath)
     extension = os.path.splitext(filePath)[1]
@@ -87,7 +120,7 @@ def encodingSettings(filePath):
 
     if extension != EXTPNG:
         print(
-            f"\nPlease use a supported format, the {extension} format is currently not supported"
+            f"\nPlease use the .png format, the {extension} format is currently not supported"
         )
         input("\nPress Enter to return to the encoding menu...")
         clearTerminal()
@@ -115,6 +148,17 @@ def encodingSettings(filePath):
 
 
 def encodingFingerprint(filePath):
+    """
+    Prompts the user to create a fingerprint for the encoded file, if no
+    fingerprint is entered, a custom fingerprint is used.
+
+    Params:
+        filePath (str): The path to the image file selected for encoding.
+
+    Returns:
+        None
+    """
+    
     fingerprint = DEFAULTPASS
     fileName = os.path.basename(filePath)
 
@@ -142,6 +186,20 @@ def encodingFingerprint(filePath):
 
 
 def encodingInformation(filePath, hash, fingerprint):
+    """
+    Encodes, encrypts and embeds encoded data into the provided image using
+    LSB steganography techniques. On top of this, a deterministic RNG algorithm
+    is used to chaotically distrubute embed information.
+
+    Params:
+        filePath (str): The path to the image file selected for encoding.
+        hash (str): The SHA-256 hash created by the fingerprint.
+        fingerprint (str): A string provided by the user to embed data.
+
+    Returns:
+        None
+    """
+    
     if fingerprint == DEFAULTPASS:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
@@ -213,6 +271,16 @@ def encodingInformation(filePath, hash, fingerprint):
 
 
 def decodeMenu():
+    """
+    Display the decoding menu and handle user input for decoding an image.
+
+    Params:
+        None
+
+    Returns:
+        None
+    """
+    
     printDecodeMenu()
 
     decodeSelection = input("Option Selected: ")
@@ -237,12 +305,23 @@ def decodeMenu():
 
 
 def decodeInformationFootprint(filePath):
+    """
+    Decodes hidden information from a provided PNG image using a provided
+    fingerprint.
+
+    Params:
+        filePath (str): The path to the image file selected for encoding.
+
+    Returns:
+        None
+    """
+
     print(
         "★ Please enter your fingerprint. If left blank, the default fingerprint 'steganography' will be used. ★\n"
     )
     hashPlainText = input("Please input your footprint: ")
     if hashPlainText == "":
-        hashPlainText = "steganography"
+        hashPlainText = DEFAULTPASS
 
     clearTerminal()
     print(f'★ Decoding data using fingerprint, "{hashPlainText}" ★')
