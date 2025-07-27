@@ -4,8 +4,7 @@ import os
 import math
 from PIL import Image
 from Helpers import *
-from pathlib import Path
-from blake3 import blake3
+from DisplayScripts import *
 
 ENCODE = "1"
 DECODE = "2"
@@ -26,24 +25,18 @@ CONFIRM2 = "y"
 DENY = "no"
 DENY2 = "n"
 
-NULLBIT = "0"
-POSBIT = "1"
-
-VARWARNING = 500
-ENTWARNING = 5
-
 HASHSIZE = 64
 HASHHALF = 32
 
 EXTHEADER = "|EXT="
-DEFAULTHEADER = "Text "
+TEXTHEADER = "Text "
 
 DEFAULTPASS = "steganography"
 
-NOFILE = 1
-INVALIDOPTION = 2
-NOINFORMATION = 3
-INVALIDMSG = 4
+NOFILE = 0
+INVALIDOPTION = 1
+NOINFORMATION = 2
+INVALIDMSG = 3
 
 print("★ Stego Tools ★\n")
 
@@ -268,10 +261,6 @@ def decodeInformationFootprint(filePath):
     asciiOutput = bitsToAscii(lsbString)
 
     if firstFingerprint in asciiOutput:
-        print(
-            f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
-        )
-
         lsbString = extractLSBBits(filePath, totalBits - RGBCHANNELS, hashPlainText)
         asciiOutput = bitsToAscii(lsbString)
 
@@ -286,7 +275,7 @@ def decodeInformationFootprint(filePath):
             rawInformation = slice(startIndex + HASHHALF, endIndex)
             asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
         
-            if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
+            if (EXTHEADER + TEXTHEADER) in asciiOutput:
                 printDecodedInformation(TEXTINPUT, asciiOutput)
             else:
                 printDecodedInformation(FILEINPUT, asciiOutput)
