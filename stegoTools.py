@@ -67,7 +67,7 @@ def mainMenu():
         displayExitMenu()
     else:
         clearTerminal()
-        print("★ PLease type  1, 2 or 3 to continue. ★\n")
+        print("★ Please type 1, 2 or 3 to continue. ★\n")
         mainMenu()
 
 

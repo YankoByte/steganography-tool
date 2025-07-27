@@ -85,12 +85,12 @@ def generateSecureSample(key, limit, count):
     indices = list(range(limit))
 
     hasher = blake3(key.encode())
-    random_bytes = hasher.digest(length=8 * limit)
+    randomBytes = hasher.digest(length=8 * limit)
 
     # Fisher-Yates shuffle to generate deterministically random permutation
     for i in reversed(range(1, limit)):
-        start = (i * 8) % len(random_bytes)
-        val = int.from_bytes(random_bytes[start : start + 8], "big")
+        start = (i * 8) % len(randomBytes)
+        val = int.from_bytes(randomBytes[start : start + 8], "big")
 
         j = val % (i + 1)
         indices[i], indices[j] = indices[j], indices[i]
