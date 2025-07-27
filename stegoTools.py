@@ -5,6 +5,7 @@ import math
 from PIL import Image
 from Helpers import *
 from pathlib import Path
+from blake3 import blake3
 
 ENCODE = "1"
 DECODE = "2"
@@ -16,6 +17,7 @@ EXTPNG = ".png"
 TEXTINPUT = "1"
 FILEINPUT = "2"
 
+BYTETOBIT = 8
 BYTETOKILOBYTE = 1 / 1000
 RGBCHANNELS = 3
 
@@ -187,21 +189,18 @@ def encodingInformation(filePath, hash, fingerprint):
 
     img = im.load()
 
-    for i in range(totalPixels):
-        currentX = i % width
-        currentY = math.floor(i / width)
+    mapping = generateSecureSample(fingerprint, encodeLimit, totalBits)
 
-        pixel = list(img[currentX, currentY])
+    for i in range(totalBits):
+        currentPixel = math.ceil(mapping[i] / 3)
+        xCoords = currentPixel % width
+        yCoords = math.floor(currentPixel / width)
+        currentChannel = mapping[i] % 3
 
-        for j in range(RGBCHANNELS):
-            bitIndex = i * 3 + j
-            if bitIndex >= totalBits:
-                break
-
-            pixel[j] = (pixel[j] & ~1) | int(encodedData[bitIndex])
-
-        img[currentX, currentY] = tuple(pixel)
-        pixel = list(img[currentX, currentY])
+        pixel = list(img[xCoords, yCoords])
+        pixel[currentChannel] = (pixel[currentChannel] & ~1) | int(encodedData[i])
+        # print(f"{i} - bit {mapping[i]} | pixel {currentPixel} [{xCoords}, {yCoords}] | channel [{currentChannel} - Val: {pixel[currentChannel] & 1}]")
+        img[xCoords, yCoords] = tuple(pixel)
 
     im.save(outputName)
     print(
@@ -263,25 +262,36 @@ def decodeInformationFootprint(filePath):
     width, height = im.size
     totalBits = width * height * RGBCHANNELS
 
-    lsbString = extractLSBBits(filePath, totalBits)
+    lsbString = extractLSBBits(filePath, HASHHALF * BYTETOBIT, hashPlainText)
     asciiOutput = bitsToAscii(lsbString)
 
-    if firstFingerprint in asciiOutput and lastFingerprint in asciiOutput:
-        startIndex = asciiOutput.find(firstFingerprint)
-        endIndex = asciiOutput.find(lastFingerprint)
-
+    if firstFingerprint in asciiOutput:
         print(
             f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
         )
 
-        rawInformation = slice(startIndex + HASHHALF, endIndex)
-        asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
-        
-        if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
-           printDecodedInformation(TEXTINPUT, asciiOutput)
-        else:
-            printDecodedInformation(FILEINPUT, asciiOutput)
+        lsbString = extractLSBBits(filePath, totalBits - RGBCHANNELS, hashPlainText)
+        asciiOutput = bitsToAscii(lsbString)
 
+        if lastFingerprint in asciiOutput:
+            startIndex = asciiOutput.find(firstFingerprint)
+            endIndex = asciiOutput.find(lastFingerprint)
+
+            print(
+                f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
+                )
+
+            rawInformation = slice(startIndex + HASHHALF, endIndex)
+            asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
+        
+            if (EXTHEADER + DEFAULTHEADER) in asciiOutput:
+                printDecodedInformation(TEXTINPUT, asciiOutput)
+            else:
+                printDecodedInformation(FILEINPUT, asciiOutput)
+
+        else:
+            printError(NOINFORMATION)
+    
     else:
         printError(NOINFORMATION)
 
@@ -293,6 +303,5 @@ def decodeInformationFootprint(filePath):
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
     mainMenu()
-
 
 mainMenu()

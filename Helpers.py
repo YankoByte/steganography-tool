@@ -43,6 +43,9 @@ INVALIDOPTION = 2
 NOINFORMATION = 3
 INVALIDMSG = 4
 
+FILESIZE = 1
+ENCODABLEINFO = 2
+
 
 def clearTerminal():
     if os.name == "nt":
@@ -105,14 +108,14 @@ def writeToFile(decodedInformation, outputFilePath):
     with open(outputFilePath, 'wb') as f:
         f.write(binaryData)
 
-def extractLSBBits(filePath, totalBits, key = DEFAULTPASS):
+def extractLSBBits(filePath, totalBits, key):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
     im = Image.open(filePath).convert("RGB")
     pixels = im.load()
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS
 
-    mapping = generateSecureSample(DEFAULTPASS, encodeLimit, totalBits)
+    mapping = generateSecureSample(key, encodeLimit, totalBits)
 
     bits = []
     for i in range(totalBits):
@@ -206,7 +209,7 @@ def printFileStats(filePath, fileName, fileSize, extension):
     print("═══ FILE STATS ═══")
     print(f"Full File Directory: {filePath}")
     print(f"File Name: {fileName}")
-    fileSizeConversion(fileSize)
+    fileSizeConversion(fileSize, FILESIZE)
     print(f"File Extension: {extension}\n")
 
 
@@ -214,11 +217,10 @@ def printImageStats(filePath):
     im = Image.open(filePath)
     width, height = im.size
     encodeLimit = width * height * RGBCHANNELS * BITTOBYTE * BYTETOKILOBYTE
-    encodeLimit = round(encodeLimit, 2)
 
     print("═══ IMAGE STATS ═══")
     print(f"Dimensions: {width}px x {height}px")
-    print(f"Encodable Information: {encodeLimit} kB\n")
+    fileSizeConversion(encodeLimit, ENCODABLEINFO)
 
 
 
@@ -234,7 +236,7 @@ def printStegHeuristics(filePath):
     gEnt = calcChannelEntropy(filePath, GCHAN)
     bEnt = calcChannelEntropy(filePath, BCHAN)
 
-    print("═══ STENOGRAPHIC HEURISTICS ═══")
+    print("\n═══ STENOGRAPHIC HEURISTICS ═══")
     print(f"Total Variance: {totalVariance}")
     print(f"Channel Variance: [{rVar}, {gVar}, {bVar}] (R,G,B)")
     print(f"Entropy: {totalEntropy}")
@@ -367,24 +369,32 @@ def printError(errorType):
     elif errorType == INVALIDMSG:
         print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")
 
-def fileSizeConversion(fileSize):
+def fileSizeConversion(fileSize, displayInfo):
+    startingText = None
+
+    if displayInfo == FILESIZE:
+        startingText = "File Size:"
+    else:
+        startingText = "Encodable Information:"
+
+
     fileSize = fileSize * KILOBYTETOBYTE
     power = math.log(fileSize, KILOBYTETOBYTE)
 
     if power < 1:
-        print(f"File Size: {fileSize} B")
+        print(f"{startingText} {fileSize} B")
     elif power < 2:
         fileSize = fileSize * BYTETOKILOBYTE
         fileSize = round(fileSize, 2)
-        print(f"File Size: {fileSize} kB")
+        print(f"{startingText} {fileSize} kB")
     elif power < 3:
         fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE
         fileSize = round(fileSize, 2)
-        print(f"File Size: {fileSize} mB")
+        print(f"{startingText} {fileSize} mB")
     else:
         fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE * BYTETOKILOBYTE
         fileSize = round(fileSize, 2)
-        print(f"File Size: {fileSize} gB")
+        print(f"{startingText} {fileSize} gB")
 
 def generateSecureSample(key, limit, count):
     limit = limit - RGBCHANNELS
