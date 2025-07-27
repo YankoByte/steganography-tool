@@ -239,7 +239,7 @@ def printDecodedInformation(inputType, asciiOutput):
         print(f"Decoded Information: {decodedInformation}")
         print(f"Default Output Name: {outputName}")
 
-        print("\n★ Please Enter a Name for the Output File (default: output.png) ★")
+        print(f"\n★ Please Enter a Name for the Output File (default: {outputName}) ★")
         outputPath = input("Output Name: ")
         if outputPath == "":
             outputPath = outputName
