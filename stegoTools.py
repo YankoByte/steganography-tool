@@ -5,8 +5,8 @@ import os
 
 from PIL import Image
 
-from DisplayScripts import *
-from Helpers import *
+from scripts.displayScripts import *
+from scripts.helpers import *
 
 ENCODE = "1"
 DECODE = "2"
