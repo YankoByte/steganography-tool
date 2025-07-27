@@ -24,6 +24,54 @@ INVALIDMSG = 3
 FILESIZE = 0
 ENCODABLEINFO = 1
 
+def clearTerminal():
+    if os.name == "nt":
+        os.system("cls")
+    else:
+        os.system("clear")
+
+def displayExitMenu():
+    print("\nThank you for using Stego Tools, goodbye!")
+    input("Press Enter to Continue...")
+    exit()
+
+def printError(errorType):
+    if errorType == NOFILE:
+        print("❗ Error - File Does Not Exist! ❗\n")
+    elif errorType == INVALIDOPTION:
+        print("❗ Error - Please Type a Valid Option ❗\n")
+    elif errorType == NOINFORMATION:
+        print("\n❗ Error - no Information Could be Found ❗")
+    elif errorType == INVALIDMSG:
+        print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")
+
+def printMainMenu():
+    print("╔══════ MAIN MENU ═════╗")
+    print("║ Options              ║")
+    print("║ 1. Encoding Suite    ║")
+    print("║ 2. Decoding Suite    ║")
+    print("║ 3. Quit App          ║")
+    print("╚══════════════════════╝")
+
+def printEncodingMenu():
+    print("╔════════════════════════ ENCODING MENU ════════════════════════╗")
+    print("║ Options                                                       ║")
+    print("║ ★ Enter the full file path (including name and extension)     ║")
+    print("║    to select an image for encoding.                           ║")
+    print("║                                                               ║")
+    print('║ ★ To return to the main menu, type "return".                  ║')
+    print("╚═══════════════════════════════════════════════════════════════╝")
+
+
+def printDecodeMenu():
+    print("╔════════════════════════ DECODING MENU ════════════════════════╗")
+    print("║ Options                                                       ║")
+    print("║ ★ Enter the full file path (including name and extension)     ║")
+    print("║    to select an image for decoding.                           ║")
+    print("║                                                               ║")
+    print('║ ★ To return to the main menu, type "return".                  ║')
+    print("╚═══════════════════════════════════════════════════════════════╝")
+
 def fileSizeConversion(fileSize, displayInfo):
     startingText = None
 
@@ -50,21 +98,6 @@ def fileSizeConversion(fileSize, displayInfo):
         fileSize = fileSize * BYTETOKILOBYTE * BYTETOKILOBYTE * BYTETOKILOBYTE
         fileSize = round(fileSize, 2)
         print(f"{startingText} {fileSize} gB")
-
-def printError(errorType):
-    if errorType == NOFILE:
-        print("❗ Error - File Does Not Exist! ❗\n")
-    elif errorType == INVALIDOPTION:
-        print("❗ Error - Please Type a Valid Option ❗\n")
-    elif errorType == NOINFORMATION:
-        print("\n❗ Error - no Information Could be Found ❗")
-    elif errorType == INVALIDMSG:
-        print("❗ Error - Please Provide a Valid Message to Encode. ❗\n")
-
-def displayExitMenu():
-    print("\nThank you for using Stego Tools, goodbye!")
-    input("Press Enter to Continue...")
-    exit()
 
 def encodingErrorDisplay(totalBits, encodeLimit):
     print("\n⚠ WARNING: The data you're trying to encode exceeds the image's capacity")
@@ -117,34 +150,6 @@ def printStegHeuristics(filePath):
             "\n⚠ WARNING: One or more channels have low variance. Consider a more complex image ⚠"
         )
 
-def printEncodingMenu():
-    print("╔════════════════════════ ENCODING MENU ════════════════════════╗")
-    print("║ Options                                                       ║")
-    print("║ ★ Enter the full file path (including name and extension)     ║")
-    print("║    to select an image for encoding.                           ║")
-    print("║                                                               ║")
-    print('║ ★ To return to the main menu, type "return".                  ║')
-    print("╚═══════════════════════════════════════════════════════════════╝")
-
-
-def printMainMenu():
-    print("╔══════ MAIN MENU ═════╗")
-    print("║ Options              ║")
-    print("║ 1. Encoding Suite    ║")
-    print("║ 2. Decoding Suite    ║")
-    print("║ 3. Quit App          ║")
-    print("╚══════════════════════╝")
-
-
-def printDecodeMenu():
-    print("╔════════════════════════ DECODING MENU ════════════════════════╗")
-    print("║ Options                                                       ║")
-    print("║ ★ Enter the full file path (including name and extension)     ║")
-    print("║    to select an image for decoding.                           ║")
-    print("║                                                               ║")
-    print('║ ★ To return to the main menu, type "return".                  ║')
-    print("╚═══════════════════════════════════════════════════════════════╝")
-
 
 def printFileStats(filePath, fileName, fileSize, extension):
     print("═══ FILE STATS ═══")
@@ -196,9 +201,3 @@ def calcChannelEntropy(filePath, channel):
         entropy -= entropySum
 
     return round(entropy, 2)
-
-def clearTerminal():
-    if os.name == "nt":
-        os.system("cls")
-    else:
-        os.system("clear")
