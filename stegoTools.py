@@ -256,6 +256,8 @@ def encodingInformation(filePath, hash, key):
         img[xCoords, yCoords] = tuple(pixel)
 
     im.save(outputName)
+    preserveMetadata(filePath, outputName)
+
     print(
         f'\n★ Success — Information has been Successfully Embedded Into "{outputName}". ★'
     )

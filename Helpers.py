@@ -5,8 +5,10 @@ import hashlib
 import math
 import os
 import re
+import shutil
 from os import urandom
 from pathlib import Path
+
 
 from blake3 import blake3
 from cryptography.hazmat.backends import default_backend
@@ -253,3 +255,9 @@ def extractName(text):
     if name:
         return name.group(1)
     return None
+
+def preserveMetadata(sourceFile, destinationFile):
+    # Given a path to files, sourceFile and destinationFile
+    # copies the metadata amongst the files to hide modification
+
+    shutil.copystat(sourceFile, destinationFile)
