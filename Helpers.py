@@ -1,17 +1,19 @@
 # COMP6841 - Steganography Project Helpers File
 
-import os
+import base64
 import hashlib
 import math
-import base64
+import os
 import re
-from blake3 import blake3
-from DisplayScripts import *
+from os import urandom
 from pathlib import Path
-from PIL import Image
+
+from blake3 import blake3
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from os import urandom
+from PIL import Image
+
+from DisplayScripts import *
 
 HASHSIZE = 64
 
@@ -30,37 +32,42 @@ INVALIDOPTION = 1
 NOINFORMATION = 2
 INVALIDMSG = 3
 
+
 def hashGenerator(string):
     data = string.encode()
     return hashlib.sha256(data).hexdigest()
 
+
 def passwordToKey(password, salt):
-    key = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000, dklen=16)
+    key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 100000, dklen=16)
     return key
+
 
 def encryptText(key, plainText):
     iv = urandom(16)
-    
+
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-    
+
     ciphertext = encryptor.update(plainText.encode()) + encryptor.finalize()
-    
-    return base64.b64encode(iv + ciphertext).decode('utf-8')
+
+    return base64.b64encode(iv + ciphertext).decode("utf-8")
+
 
 def decryptText(key, encryptedData):
     encrypted_data_bytes = base64.b64decode(encryptedData)
-    
+
     iv = encrypted_data_bytes[:16]
     ciphertext = encrypted_data_bytes[16:]
-    
+
     key = passwordToKey(key, DEFAULTSALT)
     cipher = Cipher(algorithms.AES(key), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    
+
     decrypted_data = decryptor.update(ciphertext) + decryptor.finalize()
-    
-    return decrypted_data.decode('utf-8')
+
+    return decrypted_data.decode("utf-8")
+
 
 def generateSecureSample(key, limit, count):
     limit = limit - RGBCHANNELS
@@ -71,7 +78,7 @@ def generateSecureSample(key, limit, count):
 
     for i in reversed(range(1, limit)):
         start = (i * 8) % len(random_bytes)
-        val = int.from_bytes(random_bytes[start:start+8], 'big')
+        val = int.from_bytes(random_bytes[start : start + 8], "big")
 
         j = val % (i + 1)
         indices[i], indices[j] = indices[j], indices[i]
@@ -94,6 +101,7 @@ def dataEncoder(info, hash, fingerprint):
 
     data = firstFingerprint + encryptedData + lastFingerprint
     return stringToBinary(data)
+
 
 def extractLSBBits(filePath, totalBits, key):
     """Return a string of the first n_bits LSBs from the image’s RGB channels."""
@@ -130,7 +138,7 @@ def bitsToAscii(bitString):
 
 def writeToFile(decodedInformation, outputFilePath):
     binaryData = base64.b64decode(decodedInformation)
-    with open(outputFilePath, 'wb') as f:
+    with open(outputFilePath, "wb") as f:
         f.write(binaryData)
 
 
@@ -148,7 +156,7 @@ def encodingSelection():
             clearTerminal()
             printError(INVALIDMSG)
             return None
-        
+
         encodingHeader += info
 
     elif encodingSelection == FILEINPUT:
@@ -165,7 +173,7 @@ def encodingSelection():
         encodingHeader += "$"
 
         with open(filePath, "rb") as imageFile:
-            info = base64.b64encode(imageFile.read()).decode('utf-8')
+            info = base64.b64encode(imageFile.read()).decode("utf-8")
             encodingHeader += info
     else:
         clearTerminal()
@@ -174,25 +182,26 @@ def encodingSelection():
 
     return encodingHeader
 
+
 def printDecodedInformation(inputType, asciiOutput):
     print("═══ INFORMATION METADATA ═══")
     if inputType == TEXTINPUT:
-        decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER):]
+        decodedInformation = asciiOutput[len(EXTHEADER + DEFAULTHEADER) :]
         print(f"Information Format: Plaintext")
         print(f"Decoded Information: {decodedInformation}")
     else:
-        decodedInformation = asciiOutput[len(EXTHEADER):]
+        decodedInformation = asciiOutput[len(EXTHEADER) :]
         extractedFile = extractName(decodedInformation)
         nameLength = len(extractedFile) + 2
-        decodedInformation = asciiOutput[len(EXTHEADER) + nameLength:]
+        decodedInformation = asciiOutput[len(EXTHEADER) + nameLength :]
 
         file = Path(extractedFile)
-        extension = file.suffix.lstrip('.')
+        extension = file.suffix.lstrip(".")
         scriptDir = os.path.dirname(os.path.abspath(__file__))
         outputName = scriptDir
         outputName += "\\"
         outputName += extractedFile
-        
+
         print(f"Information Format: {extension}")
         print(f"Original Filename: {extractedFile}")
         print(f"Decoded Information: {decodedInformation}")
@@ -205,8 +214,9 @@ def printDecodedInformation(inputType, asciiOutput):
 
         writeToFile(decodedInformation.encode(), outputPath)
 
+
 def extractName(text):
-    name = re.search(r'\$(.*?)\$', text)
+    name = re.search(r"\$(.*?)\$", text)
     if name:
         return name.group(1)
     return None
