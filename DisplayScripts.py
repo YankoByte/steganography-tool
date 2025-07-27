@@ -1,8 +1,9 @@
-import os
-import numpy as np
 import math
-from PIL import Image
+import os
 from collections import Counter
+
+import numpy as np
+from PIL import Image
 
 RGBCHANNELS = 3
 BYTETOKILOBYTE = 1 / 1000

@@ -1,10 +1,12 @@
 # COMP6841 - Steganography Project
 
-import os
 import math
+import os
+
 from PIL import Image
-from Helpers import *
+
 from DisplayScripts import *
+from Helpers import *
 
 ENCODE = "1"
 DECODE = "2"
@@ -41,7 +43,6 @@ INVALIDMSG = 3
 print("★ Stego Tools ★\n")
 
 
-
 def mainMenu():
     """
     Display the main menu and handle the user's selection.
@@ -52,7 +53,7 @@ def mainMenu():
     Returns:
         None
     """
-    
+
     printMainMenu()
 
     mainMenuOption = input("Option Selected: ")
@@ -158,7 +159,7 @@ def encodingFingerprint(filePath):
     Returns:
         None
     """
-    
+
     fingerprint = DEFAULTPASS
     fileName = os.path.basename(filePath)
 
@@ -199,7 +200,7 @@ def encodingInformation(filePath, hash, fingerprint):
     Returns:
         None
     """
-    
+
     if fingerprint == DEFAULTPASS:
         print(
             "⚠ WARNING: Default fingerprint in use. This fingerprint is not secure ⚠\n"
@@ -280,7 +281,7 @@ def decodeMenu():
     Returns:
         None
     """
-    
+
     printDecodeMenu()
 
     decodeSelection = input("Option Selected: ")
@@ -349,11 +350,11 @@ def decodeInformationFootprint(filePath):
 
             print(
                 f"\n★ Verification Successful — the Fingerprint '{hashPlainText}' is Correct. \n"
-                )
+            )
 
             rawInformation = slice(startIndex + HASHHALF, endIndex)
             asciiOutput = decryptText(hashPlainText, asciiOutput[rawInformation])
-        
+
             if (EXTHEADER + TEXTHEADER) in asciiOutput:
                 printDecodedInformation(TEXTINPUT, asciiOutput)
             else:
@@ -361,7 +362,7 @@ def decodeInformationFootprint(filePath):
 
         else:
             printError(NOINFORMATION)
-    
+
     else:
         printError(NOINFORMATION)
 
@@ -373,5 +374,6 @@ def decodeInformationFootprint(filePath):
     clearTerminal()
     print("★ Returning to Main Menu... ★\n")
     mainMenu()
+
 
 mainMenu()
